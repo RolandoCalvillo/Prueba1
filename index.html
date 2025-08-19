@@ -3,572 +3,582 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación Modular</title>
+    <title>Evaluación Modular CNCI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            color: #1a202c;
+            background-color: #f0f4f8;
         }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 2rem;
-        }
-        .card {
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-        .v-enter-active, .v-leave-active {
-            transition: opacity 0.5s ease;
-        }
-        .v-enter-from, .v-leave-to {
-            opacity: 0;
-        }
-        .progress-bar-bg {
-            background-color: #e2e8f0;
-            border-radius: 9999px;
-        }
-        .progress-bar-fill {
+        .bg-cnci-blue {
             background-color: #2a6aff;
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 1s ease-in-out;
         }
-        .progress-bar-fill-orange {
+        .text-cnci-orange {
+            color: #ff8500;
+        }
+        .bg-cnci-orange {
             background-color: #ff8500;
         }
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .tab-button.active {
-            background-color: #2a6aff;
-            color: #ffffff;
-        }
-        .tab-button:not(.active):hover {
-            background-color: #e2e8f0;
-        }
-        .flip-card {
-            background-color: transparent;
-            width: 100%;
-            height: 100%;
+        .card-container {
             perspective: 1000px;
         }
-        .flip-card-inner {
-            position: relative;
+        .card {
             width: 100%;
             height: 100%;
-            text-align: center;
             transition: transform 0.6s;
             transform-style: preserve-3d;
+            position: relative;
         }
-        .flip-card:hover .flip-card-inner {
+        .card.is-flipped {
             transform: rotateY(180deg);
         }
-        .flip-card-front, .flip-card-back {
+        .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
-            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: white;
         }
-        .flip-card-front {
-            background-color: #ffffff;
-            color: #1a202c;
-        }
-        .flip-card-back {
-            background-color: #ffffff;
-            color: #1a202c;
+        .card-face-back {
             transform: rotateY(180deg);
         }
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .progress-bar {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 1.5rem;
         }
-        .fade-in {
-            animation: fade-in 0.5s ease-in-out;
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
         }
+        /* Custom scrollbar for improved aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a6aff;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1a4ccc;
+        }
+        .tab-button.active {
+            border-bottom: 2px solid #ff8500;
+            color: #2a6aff;
+            font-weight: 600;
+        }
+
+        /* Flexbox for main layout */
+        .flex-center-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .flex-col-start {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .flex-between-center {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Responsive Grid for Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .btn-return {
+            background-color: transparent;
+            border: 2px solid #2a6aff;
+            color: #2a6aff;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-return:hover {
+            background-color: #2a6aff;
+            color: white;
+        }
+        
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div id="app" class="container">
-        <!-- Pantalla de Inicio -->
-        <div id="homeScreen" class="text-center fade-in">
-            <div class="mb-8">
-                <img src="https://i.ibb.co/m5QcyKWg/Logo-CNCI.png" alt="Logo CNCI" class="h-16 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-gray-800">Evaluación Modular – Departamento de Servicios Estudiantiles ✨</h1>
-                <p class="text-lg text-gray-600 mt-2">Módulo M8, Agosto 2025 🗓️</p>
-            </div>
-            <div class="card p-8 w-full max-w-md mx-auto">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Acceso al Sistema 🔐</h2>
-                <p class="text-gray-600 mb-6">Consulta tu desempeño del módulo de manera detallada ingresando tu usuario Vici.</p>
-                <div class="mb-6">
-                    <label for="usernameInput" class="block text-left text-sm font-medium text-gray-700 mb-1">Usuario Vici</label>
-                    <input type="text" id="usernameInput" placeholder="Ejemplo: Asesor01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div id="errorMessage" class="text-red-500 mb-4 hidden"></div>
-                <button id="consultButton" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105">
-                    Consultar mi Evaluación 🚀
-                </button>
-            </div>
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="w-full max-w-xl mx-auto p-8 bg-white rounded-xl shadow-2xl flex-center-col transition-opacity duration-500 ease-in-out opacity-100">
+        <img src="https://i.ibb.co/m5QcyKW/Logo-CNCI.png" alt="Logo de la Universidad CNCI" class="h-16 w-auto mb-6">
+        <div class="text-center w-full">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-cnci-blue mb-2">Evaluación Modular – Departamento de Servicios Estudiantiles</h1>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-700 mb-2">Módulo M8, Agosto 2025 🗓️</h2>
+            <p class="text-gray-600 mb-6">Consulta tu desempeño del módulo de manera detallada ingresando tu usuario Vici. ✨</p>
         </div>
-
-        <!-- Pantalla de Evaluación -->
-        <div id="reportScreen" class="hidden fade-in">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center space-x-4">
-                    <button id="backButton" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300">
-                        ← Volver
-                    </button>
-                    <img src="https://i.ibb.co/m5QcyKWg/Logo-CNCI.png" alt="Logo CNCI" class="h-12">
-                </div>
-            </div>
-            
-            <div class="card mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-3xl font-bold text-gray-800">Resultados de Evaluación 📊</h2>
-                    <div id="userNameDisplay" class="text-lg font-semibold text-gray-700"></div>
-                </div>
-                
-                <div class="flex space-x-2 border-b border-gray-200 mb-6">
-                    <button id="tab-resumen" class="tab-button active">Resumen General 📋</button>
-                    <button id="tab-tendencias" class="tab-button">Tendencias 📈</button>
-                    <button id="tab-insignias" class="tab-button">Insignias 🏅</button>
-                    <button id="tab-plan" class="tab-button">Plan de Mejora 📝</button>
-                </div>
-
-                <!-- Contenido de Pestañas -->
-                <div id="tab-content-container">
-                    <!-- Pestaña Resumen General -->
-                    <div id="resumen-content" class="tab-content fade-in">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div class="bg-gradient-to-r from-green-400 to-green-500 text-white p-6 rounded-2xl flex flex-col justify-center items-center">
-                                <span class="text-lg font-semibold">Calificación General ⭐</span>
-                                <span id="calificacionGeneral" class="text-5xl font-bold mt-2"></span>
-                            </div>
-                            <div class="bg-gradient-to-r from-orange-400 to-orange-500 text-white p-6 rounded-2xl flex flex-col justify-center items-center">
-                                <span class="text-lg font-semibold">Meta de Llamadas 📞</span>
-                                <span id="metaLlamadas" class="text-5xl font-bold mt-2"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Criterios de Evaluación -->
-                            <!-- Tarjetas con flip -->
-                        </div>
-
-                        <div id="criteriosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                            <!-- Los criterios de evaluación se insertarán aquí dinámicamente -->
-                        </div>
-                        
-                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                            <h3 class="text-xl font-semibold mb-2 text-gray-800">Comentarios Generales del Supervisor 💬</h3>
-                            <p id="comentariosSupervisor" class="text-gray-700 leading-relaxed"></p>
-                        </div>
-                        
-                        <div class="mt-6">
-                            <a id="detallesEvaluacionLink" href="#" target="_blank" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition duration-300 block text-center">
-                                Detalles de Evaluación 🔎
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Pestaña Tendencias -->
-                    <div id="tendencias-content" class="tab-content hidden fade-in">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Evolución de Desempeño Anual 📈</h3>
-                        <div class="w-full aspect-video bg-gray-50 rounded-lg p-4 mb-8 flex justify-center items-center">
-                            <!-- Gráfica de ejemplo -->
-                            <img src="https://i.ibb.co/3k5M8Pz/tendencias-ejemplo.png" alt="Gráfica de Tendencias" class="w-full h-auto object-contain">
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <div class="card p-6">
-                                <h4 class="text-xl font-semibold mb-2 text-gray-800">La Mayor Mejora 🏆</h4>
-                                <p id="mayorMejora" class="text-gray-700"></p>
-                                <div class="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h5 class="font-semibold text-gray-800 mb-1">Comentarios del Supervisor 💬</h5>
-                                    <p id="comentariosMejora" class="text-gray-700"></p>
-                                </div>
-                            </div>
-                            <div class="card p-6">
-                                <h4 class="text-xl font-semibold mb-2 text-gray-800">Área Crítica 🚨</h4>
-                                <p id="areaCritica" class="text-gray-700"></p>
-                                <div class="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h5 class="font-semibold text-gray-800 mb-1">Comentarios del Supervisor 💬</h5>
-                                    <p id="comentariosCritica" class="text-gray-700"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pestaña Insignias -->
-                    <div id="insignias-content" class="tab-content hidden fade-in">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Tus Insignias 🏅</h3>
-                        <div id="insigniasContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <!-- Las insignias se insertarán aquí dinámicamente -->
-                        </div>
-                        <div class="card p-6">
-                            <h4 class="text-xl font-semibold mb-4 text-gray-800">Próximas Insignias ➡️</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h5 class="font-semibold text-gray-800 mb-2">Fortalezas 💪</h5>
-                                    <ul id="fortalezasList" class="list-disc list-inside space-y-1 text-gray-700">
-                                        <!-- Fortalezas se insertarán aquí -->
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h5 class="font-semibold text-gray-800 mb-2">Áreas de Oportunidad 🌱</h5>
-                                    <ul id="oportunidadesList" class="list-disc list-inside space-y-1 text-gray-700">
-                                        <!-- Oportunidades se insertarán aquí -->
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pestaña Plan de Mejora -->
-                    <div id="plan-content" class="tab-content hidden fade-in">
-                        <div class="card p-6">
-                            <h3 class="text-2xl font-bold text-gray-800 mb-4">Plan de Mejora 🎯</h3>
-                            <p class="text-gray-700 leading-relaxed mb-4">
-                                Instrucciones para el Plan de Mejora. A partir de los resultados de tu evaluación, identifica de 3 a 4 áreas de oportunidad y describe acciones concretas que puedas implementar para mejorarlas. Indica el plazo estimado y cómo darás seguimiento a cada acción. Sé específico y realista para facilitar el cumplimiento y la evaluación de avances.
-                            </p>
-                            <p class="text-gray-700 leading-relaxed mb-6">
-                                Ingresa al siguiente enlace, redacta y establece tu plan de mejora antes del 11 de septiembre de 2025.
-                            </p>
-                            <a href="https://docs.google.com/document/d/1234567890abcdefghijklmnopqrstuvwxyz" target="_blank" class="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition duration-300 block text-center">
-                                Ir a mi Plan de Mejora ✍️
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="w-full">
+            <input type="text" id="userInput" placeholder="Escribe tu usuario aquí, ej. Asesor01" class="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-cnci-blue focus:border-transparent transition duration-300 mb-4 text-center text-lg">
+            <div id="loginError" class="text-red-500 text-sm mb-4 hidden text-center">Usuario no encontrado. Por favor, intenta de nuevo. 😥</div>
+            <button id="consultarBtn" class="w-full py-4 bg-cnci-blue text-white font-bold rounded-xl shadow-lg hover:bg-cnci-orange transition duration-300">Consultar mi Evaluación 🔎</button>
         </div>
     </div>
 
+    <!-- Pantalla de Evaluación (oculta inicialmente) -->
+    <div id="evaluation-screen" class="w-full max-w-5xl mx-auto p-6 md:p-10 bg-white rounded-xl shadow-2xl transition-opacity duration-500 ease-in-out opacity-0 hidden">
+        <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+            <div class="text-left w-full">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-cnci-blue mb-1">Resultados de Evaluación 📊</h1>
+                <p class="text-xl md:text-2xl font-bold text-gray-700"><span id="asesorName"></span></p>
+            </div>
+            <button id="returnBtn" class="btn-return mt-4 md:mt-0">Volver ↩️</button>
+        </div>
+
+        <!-- Pestañas -->
+        <div class="flex space-x-2 md:space-x-4 border-b border-gray-200 mb-6">
+            <button class="tab-button active pb-2 px-2" data-tab="resumen">Resumen General 🌟</button>
+            <button class="tab-button pb-2 px-2" data-tab="tendencias">Tendencias 📈</button>
+            <button class="tab-button pb-2 px-2" data-tab="insignias">Insignias 🏆</button>
+            <button class="tab-button pb-2 px-2" data-tab="plan">Plan de Mejora 📝</button>
+        </div>
+
+        <!-- Contenido de las Pestañas -->
+        <div id="tab-content">
+            <!-- Pestaña 1: Resumen General -->
+            <div id="resumen" class="tab-pane">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold text-cnci-blue mb-2">Calificación General ⭐</h3>
+                        <div class="progress-bar">
+                            <div id="generalScore" class="progress-fill bg-green-500"></div>
+                        </div>
+                        <p class="mt-2 text-right text-gray-600"><span id="generalScoreValue"></span>%</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md">
+                        <h3 class="text-xl font-bold text-cnci-blue mb-2">Meta de Llamadas 📞</h3>
+                        <div class="progress-bar">
+                            <div id="callsGoal" class="progress-fill bg-cnci-orange"></div>
+                        </div>
+                        <p class="mt-2 text-right text-gray-600"><span id="callsGoalValue"></span>%</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Criterios de Evaluación 📝</h3>
+                <div id="assessment-cards" class="card-grid">
+                    <!-- Las tarjetas de criterios se generarán con JS aquí -->
+                </div>
+
+                <div class="mt-8 p-6 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-cnci-blue mb-2">Comentarios Generales del Supervisor 💬</h3>
+                    <textarea id="supervisorComments" class="w-full h-32 p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cnci-blue focus:border-transparent transition duration-300" readonly></textarea>
+                    <a href="https://example.com/detalles-evaluacion" target="_blank" class="w-full py-3 px-6 mt-4 inline-block text-center bg-cnci-blue text-white font-bold rounded-xl shadow-lg hover:bg-cnci-orange transition duration-300">Detalles de Evaluación 🔗</a>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Tendencias -->
+            <div id="tendencias" class="tab-pane hidden">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">Evolución del Desempeño 📈</h3>
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md mb-8">
+                    <canvas id="performanceChart" class="w-full h-auto max-h-96"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-lg font-bold text-cnci-blue mb-2">Mes Anterior (-2)</h4>
+                        <p class="text-2xl font-bold text-gray-800"><span id="month2Score"></span></p>
+                        <p class="text-sm text-gray-600"><span id="month2Trend"></span></p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-lg font-bold text-cnci-blue mb-2">Mes Pasado (-1)</h4>
+                        <p class="text-2xl font-bold text-gray-800"><span id="month1Score"></span></p>
+                        <p class="text-sm text-gray-600"><span id="month1Trend"></span></p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-lg font-bold text-cnci-blue mb-2">Mes Actual</h4>
+                        <p class="text-2xl font-bold text-gray-800"><span id="currentMonthScore"></span></p>
+                        <p class="text-sm text-gray-600">--</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md">
+                        <h4 class="text-lg font-bold text-cnci-blue mb-2">Mayor Mejora 🚀</h4>
+                        <p id="mayorMejora" class="text-gray-600"></p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-md">
+                        <h4 class="text-lg font-bold text-cnci-blue mb-2">Área Crítica ⚠️</h4>
+                        <p id="areaCritica" class="text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña 3: Insignias -->
+            <div id="insignias" class="tab-pane hidden">
+                <h3 class="text-xl font-bold text-cnci-blue mb-4">Tus Insignias 🏆</h3>
+                <ul id="badges-list" class="space-y-4 mb-8">
+                    <!-- Las insignias se generarán con JS aquí -->
+                </ul>
+
+                <h3 class="text-xl font-bold text-cnci-blue mb-4">Próximas Insignias ✨</h3>
+                <ul id="upcoming-badges" class="space-y-4">
+                    <!-- Las próximas insignias se generarán con JS aquí -->
+                </ul>
+            </div>
+
+            <!-- Pestaña 4: Plan de Mejora -->
+            <div id="plan" class="tab-pane hidden">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-cnci-blue mb-2">Instrucciones para el Plan de Mejora 📝</h3>
+                    <p class="text-gray-600 mb-4">A partir de los resultados de tu evaluación, identifica de 3 a 4 áreas de oportunidad y describe acciones concretas que puedas implementar para mejorarlas. Indica el plazo estimado y cómo darás seguimiento a cada acción. Sé específico y realista para facilitar el cumplimiento y la evaluación de avances. Ingresa al siguiente enlace, redacta y establece tu plan de mejora antes del 11 de septiembre de 2025.</p>
+                    <a href="https://ejemplo.com/plan-de-mejora" target="_blank" class="w-full py-3 px-6 mt-4 inline-block text-center bg-cnci-blue text-white font-bold rounded-xl shadow-lg hover:bg-cnci-orange transition duration-300">Acceder a mi Plan de Mejora 📄</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Librerías JS para gráficos (Chart.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        const users = {
-            "Asesor01": {
-                name: "Asesor 01",
-                generalScore: 92,
-                callGoal: 100,
-                metrics: {
-                    "Retención 🛡️": {
-                        supervision: { score: 95, comment: "Excelente seguimiento de casos de deserción. Mantén el buen trabajo." },
-                        quality: { score: 90, comment: "La comunicación con los estudiantes en riesgo es muy efectiva." }
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Datos de ejemplo para cada asesor
+            const asesores = {
+                "asesor01": {
+                    name: "Asesor 01",
+                    generalScore: 88,
+                    callsGoal: 95,
+                    comments: "Excelente desempeño en general. El asesor muestra un gran compromiso con la calidad y la satisfacción del estudiante. El manejo de los procesos es impecable.",
+                    criteria: {
+                        "Retención": { supervision: { score: 90, comment: "Muy proactivo en la retención." }, quality: { score: 85, comment: "Excelente seguimiento de los casos." } },
+                        "Reincorporación": { supervision: { score: 85, comment: "Necesita mejorar el seguimiento." }, quality: { score: 90, comment: "Buen manejo de las objeciones." } },
+                        "Procesos": { supervision: { score: 95, comment: "Impecable. Sin errores." }, quality: { score: 98, comment: "Todos los procesos seguidos al pie de la letra." } },
+                        "Llamada": { supervision: { score: 90, comment: "Tono profesional y empático." }, quality: { score: 88, comment: "Buena escucha activa." } },
+                        "WhatsApp": { supervision: { score: 85, comment: "Respuestas oportunas." }, quality: { score: 92, comment: "Claro y conciso." } },
+                        "Correo electrónico": { supervision: { score: 92, comment: "Excelente redacción." }, quality: { score: 95, comment: "Respuestas completas." } },
+                        "Viva Engage": { supervision: { score: 80, comment: "Participación moderada." }, quality: { score: 85, comment: "Aporta valor." } },
+                        "Actividades administrativas": { supervision: { score: 95, comment: "Tareas completadas a tiempo." }, quality: { score: 98, comment: "Datos correctos y precisos." } }
                     },
-                    "Reincorporación 🔄": {
-                        supervision: { score: 85, comment: "Buen trabajo en la reconexión de estudiantes inactivos. Podemos mejorar la tasa." },
-                        quality: { score: 80, comment: "Identifica oportunidades de mejora en la oferta de soluciones para reingreso." }
+                    trends: {
+                        months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'],
+                        scores: [78, 80, 82, 85, 87, 88, 90, 88],
+                        currentMonthScore: 88,
+                        month1Score: 90,
+                        month2Score: 88,
+                        mayorMejora: "Llamada: Incremento del 5% en la calidad de las llamadas.",
+                        areaCritica: "Viva Engage: Necesita mayor interacción."
                     },
-                    "Procesos ✅": {
-                        supervision: { score: 98, comment: "Cumplimiento impecable de todos los procesos administrativos. ¡Sigue así!" },
-                        quality: { score: 98, comment: "Manejo experto y eficiente de la documentación y flujos de trabajo." }
-                    },
-                    "Llamada 📞": {
-                        supervision: { score: 95, comment: "Las llamadas son claras, profesionales y siempre resuelven las dudas." },
-                        quality: { score: 92, comment: "Excelente tono de voz y empatía con los estudiantes." }
-                    },
-                    "WhatsApp 📱": {
-                        supervision: { score: 90, comment: "Respuestas rápidas y precisas. La atención es de alta calidad." },
-                        quality: { score: 88, comment: "La escritura es clara y concisa, evitando malentendidos." }
-                    },
-                    "Correo electrónico 📧": {
-                        supervision: { score: 95, comment: "Respuestas completas y bien estructuradas. ¡Muy profesional!" },
-                        quality: { score: 95, comment: "La gramática y ortografía son perfectas. Excelente." }
-                    },
-                    "Viva Engage 💬": {
-                        supervision: { score: 98, comment: "Participación activa y constructiva en la comunidad. ¡Liderazgo notable!" },
-                        quality: { score: 98, comment: "Aportes valiosos que ayudan a la colaboración del equipo." }
-                    },
-                    "Actividades administrativas 📝": {
-                        supervision: { score: 95, comment: "Entrega de reportes y tareas en tiempo y forma. Excelente organización." },
-                        quality: { score: 90, comment: "Manejo eficiente de la plataforma y herramientas internas." }
-                    }
-                },
-                supervisorComments: "Asesor01 ha mostrado un excelente desempeño este mes. Su atención al cliente es destacable y sigue los protocolos de manera consistente. Debe mejorar en los tiempos de respuesta para alcanzar los objetivos del equipo.",
-                badges: [
-                    "Precisión en calidad",
-                    "Solucionador(a)",
-                    "Maestro(a) de procesos"
-                ],
-                upcomingBadges: {
-                    fortalezas: [
-                        "Excelente seguimiento de protocolos de atención",
-                        "Alta calidad en la comunicación con clientes",
-                        "Buena capacidad para resolver casos complejos"
+                    badges: [
+                        { emoji: '🏆', title: 'Maestro de Procesos' },
+                        { emoji: '🏅', title: 'Especialista en Retención' },
+                        { emoji: '🌟', title: 'Campeón de Comunicación' }
                     ],
-                    oportunidades: [
-                        "Mejorar tiempos de respuesta en llamadas de alto volumen",
-                        "Incrementar conocimiento de productos nuevos",
-                        "Desarrollar técnicas de venta cruzada"
+                    upcomingBadges: [
+                        { emoji: '💪', title: 'Ninja de Reincorporación', description: 'Lograr 95% en reincorporación por 3 meses.' },
+                        { emoji: '🚀', title: 'Líder en Llamadas', description: 'Mantener un puntaje superior a 90% por 2 meses.' }
+                    ]
+                },
+                "asesor02": {
+                    name: "Asesor 02",
+                    generalScore: 75,
+                    callsGoal: 80,
+                    comments: "Se observa un esfuerzo constante, pero hay áreas de oportunidad en los procesos y la comunicación escrita. Se sugiere revisar los manuales de procedimientos.",
+                    criteria: {
+                        "Retención": { supervision: { score: 70, comment: "Necesita seguimiento." }, quality: { score: 75, comment: "Oportunidad en la persuasión." } },
+                        "Reincorporación": { supervision: { score: 75, comment: "Sigue los pasos, pero puede mejorar." }, quality: { score: 80, comment: "Interes en mejorar." } },
+                        "Procesos": { supervision: { score: 65, comment: "Oportunidad en el seguimiento." }, quality: { score: 70, comment: "Falta apego a los manuales." } },
+                        "Llamada": { supervision: { score: 80, comment: "Buena actitud, pero debe ser mas breve." }, quality: { score: 85, comment: "Llamadas largas." } },
+                        "WhatsApp": { supervision: { score: 75, comment: "Mensajes cortos." }, quality: { score: 78, comment: "Aportar mas informacion." } },
+                        "Correo electrónico": { supervision: { score: 60, comment: "Oportunidad en la redaccion." }, quality: { score: 65, comment: "Aun falta mucho por aprender." } },
+                        "Viva Engage": { supervision: { score: 70, comment: "Aun sin aportar valor." }, quality: { score: 75, comment: "Necesita mas interaccion." } },
+                        "Actividades administrativas": { supervision: { score: 80, comment: "Aun le falta." }, quality: { score: 85, comment: "Oportunidad de mejora." } }
+                    },
+                    trends: {
+                        months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'],
+                        scores: [65, 68, 70, 72, 75, 73, 76, 75],
+                        currentMonthScore: 75,
+                        month1Score: 76,
+                        month2Score: 73,
+                        mayorMejora: "Reincorporación: Aumento del 3% en reincorporación del mes anterior.",
+                        areaCritica: "Procesos: Aún hay errores, se necesita reforzar la capacitación."
+                    },
+                    badges: [
+                        { emoji: '📝', title: 'Aprendiz Destacado' },
+                        { emoji: '👍', title: 'Comunicación Clara' }
+                    ],
+                    upcomingBadges: [
+                        { emoji: '💡', title: 'Experto en Procesos', description: 'Lograr 90% en Procesos por 3 meses.' },
+                        { emoji: '🗣️', title: 'Maestro de la Palabra', description: 'Mejorar el tono de voz y la fluidez en llamadas.' }
+                    ]
+                },
+                "asesor03": {
+                    name: "Asesor 03",
+                    generalScore: 95,
+                    callsGoal: 98,
+                    comments: "El mejor desempeño del módulo. Un verdadero ejemplo a seguir. Mantiene un estándar de calidad y eficiencia extraordinario en todas las áreas. ¡Felicidades!.",
+                    criteria: {
+                        "Retención": { supervision: { score: 98, comment: "Increíblemente efectivo." }, quality: { score: 99, comment: "Excede las expectativas." } },
+                        "Reincorporación": { supervision: { score: 97, comment: "Supera la meta mensual." }, quality: { score: 98, comment: "Excelente trabajo de seguimiento." } },
+                        "Procesos": { supervision: { score: 99, comment: "Maestro en procesos. Sin palabras." }, quality: { score: 100, comment: "Absolutamente perfecto." } },
+                        "Llamada": { supervision: { score: 98, comment: "Tono de voz perfecto. Breve y conciso." }, quality: { score: 97, comment: "Llamada perfecta. Sin errores." } },
+                        "WhatsApp": { supervision: { score: 99, comment: "Excelente respuesta en tiempo y forma." }, quality: { score: 98, comment: "Excelente redaccion y comunicacion." } },
+                        "Correo electrónico": { supervision: { score: 98, comment: "Respuestas impecables. Sin errores." }, quality: { score: 99, comment: "Mejor redaccion." } },
+                        "Viva Engage": { supervision: { score: 90, comment: "Aporta valor." }, quality: { score: 95, comment: "Muy proactivo." } },
+                        "Actividades administrativas": { supervision: { score: 99, comment: "Cumple las tareas en tiempo y forma." }, quality: { score: 98, comment: "Trabajo impecable." } }
+                    },
+                    trends: {
+                        months: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'],
+                        scores: [90, 91, 93, 94, 95, 96, 95, 95],
+                        currentMonthScore: 95,
+                        month1Score: 95,
+                        month2Score: 96,
+                        mayorMejora: "Viva Engage: Aumento del 5% en su participación.",
+                        areaCritica: "Ninguna. Todo excelente. ¡Felicidades!"
+                    },
+                    badges: [
+                        { emoji: '🥇', title: 'Asesor del Mes' },
+                        { emoji: '👑', title: 'Rey de la Reincorporación' },
+                        { emoji: '💎', title: 'Comunicador Diamante' }
+                    ],
+                    upcomingBadges: [
+                        { emoji: '🌠', title: 'Leyenda CNCI', description: 'Mantener este nivel de excelencia por 3 módulos consecutivos.' },
+                        { emoji: '🗺️', title: 'Guía de Éxito', description: 'Servir como mentor para nuevos asesores.' }
                     ]
                 }
-            },
-            "Asesor02": {
-                name: "Asesor 02",
-                generalScore: 85,
-                callGoal: 85,
-                metrics: {
-                    "Retención 🛡️": {
-                        supervision: { score: 80, comment: "Necesita más proactividad en el seguimiento de estudiantes." },
-                        quality: { score: 75, comment: "Los comentarios podrían ser más empáticos." }
-                    },
-                    "Reincorporación 🔄": {
-                        supervision: { score: 90, comment: "Excelente en la persuasión para el reingreso." },
-                        quality: { score: 85, comment: "Muestra gran habilidad para identificar las necesidades del estudiante." }
-                    },
-                    "Procesos ✅": {
-                        supervision: { score: 85, comment: "Buen manejo de procesos, aunque podría agilizar algunos." },
-                        quality: { score: 88, comment: "Sigue los pasos de manera correcta, pero hay margen de mejora en la eficiencia." }
-                    },
-                    "Llamada 📞": {
-                        supervision: { score: 88, comment: "Comunica claramente, pero a veces su tono es monótono." },
-                        quality: { score: 85, comment: "Buena capacidad de escucha, pero podría ser más asertivo en las respuestas." }
-                    },
-                    "WhatsApp 📱": {
-                        supervision: { score: 80, comment: "A veces tarda en responder. Hay que mejorar los tiempos." },
-                        quality: { score: 78, comment: "Las respuestas son funcionales, pero no muy personalizadas." }
-                    },
-                    "Correo electrónico 📧": {
-                        supervision: { score: 90, comment: "Respuestas bien elaboradas. Un buen trabajo." },
-                        quality: { score: 92, comment: "La redacción es impecable. Muy profesional." }
-                    },
-                    "Viva Engage 💬": {
-                        supervision: { score: 75, comment: "Participa poco en la plataforma de la comunidad." },
-                        quality: { score: 80, comment: "Aportes esporádicos. Podría ser más constante." }
-                    },
-                    "Actividades administrativas 📝": {
-                        supervision: { score: 90, comment: "Entrega los reportes a tiempo. Buena organización." },
-                        quality: { score: 88, comment: "El llenado de formatos es correcto y preciso." }
-                    }
-                },
-                supervisorComments: "Asesor02 muestra una fortaleza en la reincorporación de estudiantes. Es muy metódico en sus procesos. Como área de oportunidad, se sugiere mejorar en su comunicación vía WhatsApp y una mayor participación en Viva Engage.",
-                badges: [
-                    "Estratega de reincorporación",
-                    "Completitud en procesos"
-                ],
-                upcomingBadges: {
-                    fortalezas: [
-                        "Habilidad para reincorporar estudiantes",
-                        "Capacidad de seguimiento de procesos",
-                        "Proactividad en el área de retención"
-                    ],
-                    oportunidades: [
-                        "Mejorar tiempos de respuesta en WhatsApp",
-                        "Incrementar la participación en Viva Engage",
-                        "Optimizar la comunicación por correo electrónico"
-                    ]
+                // Añade el resto de los asesores aquí (del 04 al 18) con datos ficticios
+            };
+
+            const users = ["asesor01", "asesor02", "asesor03", "asesor04", "asesor05", "asesor06", "asesor07", "asesor08", "asesor09", "asesor10", "asesor11", "asesor12", "asesor13", "asesor14", "asesor15", "asesor16", "asesor17", "asesor18"];
+
+            const loginScreen = document.getElementById('login-screen');
+            const evaluationScreen = document.getElementById('evaluation-screen');
+            const userInput = document.getElementById('userInput');
+            const consultarBtn = document.getElementById('consultarBtn');
+            const returnBtn = document.getElementById('returnBtn');
+            const loginError = document.getElementById('loginError');
+
+            let myChart = null;
+
+            function showScreen(screenId) {
+                if (screenId === 'evaluation') {
+                    loginScreen.classList.add('opacity-0');
+                    loginScreen.classList.add('hidden');
+                    evaluationScreen.classList.remove('hidden');
+                    setTimeout(() => evaluationScreen.classList.remove('opacity-0'), 10);
+                } else {
+                    evaluationScreen.classList.add('opacity-0');
+                    setTimeout(() => {
+                        evaluationScreen.classList.add('hidden');
+                        loginScreen.classList.remove('hidden');
+                        loginScreen.classList.remove('opacity-0');
+                        userInput.value = '';
+                    }, 500);
                 }
-            },
-            // Agrega más usuarios aquí con información de ejemplo
-            "Asesor03": {
-                name: "Asesor 03", generalScore: 78, callGoal: 70, supervisorComments: "Asesor03 necesita mejorar su proactividad y seguimiento. Los reportes están incompletos.",
-                metrics: {
-                    "Retención 🛡️": { supervision: { score: 70, comment: "" }, quality: { score: 65, comment: "" } },
-                    "Reincorporación 🔄": { supervision: { score: 75, comment: "" }, quality: { score: 70, comment: "" } },
-                    "Procesos ✅": { supervision: { score: 80, comment: "" }, quality: { score: 75, comment: "" } },
-                    "Llamada 📞": { supervision: { score: 80, comment: "" }, quality: { score: 75, comment: "" } },
-                    "WhatsApp 📱": { supervision: { score: 70, comment: "" }, quality: { score: 68, comment: "" } },
-                    "Correo electrónico 📧": { supervision: { score: 75, comment: "" }, quality: { score: 72, comment: "" } },
-                    "Viva Engage 💬": { supervision: { score: 60, comment: "" }, quality: { score: 55, comment: "" } },
-                    "Actividades administrativas 📝": { supervision: { score: 70, comment: "" }, quality: { score: 65, comment: "" } }
-                },
-                badges: [], upcomingBadges: { fortalezas: ["Conocimiento de procesos"], oportunidades: ["Mayor comunicación", "Organización en el trabajo"] }
-            },
-            "Asesor04": {
-                name: "Asesor 04", generalScore: 95, callGoal: 98, supervisorComments: "¡Excelente! Asesor04 es un ejemplo a seguir. Todo su desempeño ha sido sobresaliente.",
-                metrics: {
-                    "Retención 🛡️": { supervision: { score: 98, comment: "" }, quality: { score: 95, comment: "" } },
-                    "Reincorporación 🔄": { supervision: { score: 96, comment: "" }, quality: { score: 94, comment: "" } },
-                    "Procesos ✅": { supervision: { score: 99, comment: "" }, quality: { score: 98, comment: "" } },
-                    "Llamada 📞": { supervision: { score: 97, comment: "" }, quality: { score: 96, comment: "" } },
-                    "WhatsApp 📱": { supervision: { score: 95, comment: "" }, quality: { score: 93, comment: "" } },
-                    "Correo electrónico 📧": { supervision: { score: 98, comment: "" }, quality: { score: 97, comment: "" } },
-                    "Viva Engage 💬": { supervision: { score: 99, comment: "" }, quality: { score: 98, comment: "" } },
-                    "Actividades administrativas 📝": { supervision: { score: 98, comment: "" }, quality: { score: 97, comment: "" } }
-                },
-                badges: ["Maestro(a) de procesos", "Precisión en calidad", "Solucionador(a)", "Proactivo(s)"],
-                upcomingBadges: { fortalezas: ["Rendimiento sobresaliente en todas las áreas"], oportunidades: ["Mantener el nivel"] }
-            },
-            // ... (Agregar más usuarios si se necesita)
-        };
+            }
 
-        const homeScreen = document.getElementById('homeScreen');
-        const reportScreen = document.getElementById('reportScreen');
-        const usernameInput = document.getElementById('usernameInput');
-        const consultButton = document.getElementById('consultButton');
-        const backButton = document.getElementById('backButton');
-        const errorMessage = document.getElementById('errorMessage');
+            function loadEvaluationData(user) {
+                const data = asesores[user.toLowerCase()];
+                if (!data) {
+                    loginError.classList.remove('hidden');
+                    return;
+                }
+                loginError.classList.add('hidden');
 
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const calificacionGeneral = document.getElementById('calificacionGeneral');
-        const metaLlamadas = document.getElementById('metaLlamadas');
-        const comentariosSupervisor = document.getElementById('comentariosSupervisor');
-        const detallesEvaluacionLink = document.getElementById('detallesEvaluacionLink');
-        const criteriosContainer = document.getElementById('criteriosContainer');
-        const insigniasContainer = document.getElementById('insigniasContainer');
-        const fortalezasList = document.getElementById('fortalezasList');
-        const oportunidadesList = document.getElementById('oportunidadesList');
+                // Cargar datos en la pantalla de evaluación
+                document.getElementById('asesorName').textContent = data.name;
 
-        const tabs = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
+                // Pestaña Resumen General
+                document.getElementById('generalScore').style.width = `${data.generalScore}%`;
+                document.getElementById('generalScoreValue').textContent = data.generalScore;
+                document.getElementById('callsGoal').style.width = `${data.callsGoal}%`;
+                document.getElementById('callsGoalValue').textContent = data.callsGoal;
+                document.getElementById('supervisorComments').value = data.comments;
 
-        const mayorMejora = document.getElementById('mayorMejora');
-        const comentariosMejora = document.getElementById('comentariosMejora');
-        const areaCritica = document.getElementById('areaCritica');
-        const comentariosCritica = document.getElementById('comentariosCritica');
-        
-        // Función para mostrar/ocultar pantallas
-        function showScreen(screenId) {
-            homeScreen.classList.add('hidden');
-            reportScreen.classList.add('hidden');
-            document.getElementById(screenId).classList.remove('hidden');
-        }
+                // Criterios de Evaluación
+                const cardsContainer = document.getElementById('assessment-cards');
+                cardsContainer.innerHTML = '';
+                for (const criterion in data.criteria) {
+                    const cardData = data.criteria[criterion];
+                    const card = document.createElement('div');
+                    card.className = 'card-container';
+                    card.innerHTML = `
+                        <div class="card cursor-pointer" onclick="this.classList.toggle('is-flipped')">
+                            <!-- Frente de la tarjeta -->
+                            <div class="card-face p-4 space-y-2">
+                                <h4 class="text-xl font-bold text-cnci-blue">${criterion} 📝</h4>
+                                <div class="flex-grow">
+                                    <h5 class="font-bold">Supervisión: <span class="text-cnci-orange text-lg">${cardData.supervision.score}%</span></h5>
+                                    <p class="text-gray-600 text-sm italic">${cardData.supervision.comment}</p>
+                                </div>
+                            </div>
+                            <!-- Reverso de la tarjeta -->
+                            <div class="card-face card-face-back p-4 space-y-2">
+                                <h4 class="text-xl font-bold text-cnci-blue">${criterion} 📝</h4>
+                                <div class="flex-grow">
+                                    <h5 class="font-bold">Calidad: <span class="text-cnci-orange text-lg">${cardData.quality.score}%</span></h5>
+                                    <p class="text-gray-600 text-sm italic">${cardData.quality.comment}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    cardsContainer.appendChild(card);
+                }
+                
+                // Pestaña Tendencias
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                if (myChart) {
+                    myChart.destroy();
+                }
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.trends.months,
+                        datasets: [{
+                            label: 'Puntaje de Evaluación',
+                            data: data.trends.scores,
+                            borderColor: '#2a6aff',
+                            backgroundColor: 'rgba(42, 106, 255, 0.2)',
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#2a6aff',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Meses',
+                                    color: '#333'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Puntaje',
+                                    color: '#333'
+                                },
+                                min: 50,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 5
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                document.getElementById('month2Score').textContent = data.trends.month2Score;
+                document.getElementById('month1Score').textContent = data.trends.month1Score;
+                document.getElementById('currentMonthScore').textContent = data.trends.currentMonthScore;
+                
+                const month2TrendEmoji = data.trends.month2Score < data.trends.month1Score ? '📉' : '📈';
+                const month1TrendEmoji = data.trends.month1Score < data.trends.currentMonthScore ? '📈' : '📉';
+                document.getElementById('month2Trend').textContent = `${month2TrendEmoji} ${Math.abs(data.trends.month1Score - data.trends.month2Score)} puntos`;
+                document.getElementById('month1Trend').textContent = `${month1TrendEmoji} ${Math.abs(data.trends.currentMonthScore - data.trends.month1Score)} puntos`;
+                
+                document.getElementById('mayorMejora').textContent = `🚀 ${data.trends.mayorMejora}`;
+                document.getElementById('areaCritica').textContent = `⚠️ ${data.trends.areaCritica}`;
 
-        // Función para cambiar de pestaña
-        function changeTab(tabId) {
-            tabs.forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+                // Pestaña Insignias
+                const badgesList = document.getElementById('badges-list');
+                badgesList.innerHTML = '';
+                data.badges.forEach(badge => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center space-x-2';
+                    li.innerHTML = `<span class="text-xl">${badge.emoji}</span><span class="text-lg font-semibold text-gray-700">${badge.title}</span>`;
+                    badgesList.appendChild(li);
+                });
 
-            tabContents.forEach(content => content.classList.add('hidden'));
-            document.getElementById(`${tabId}-content`).classList.remove('hidden');
-        }
+                const upcomingBadgesList = document.getElementById('upcoming-badges');
+                upcomingBadgesList.innerHTML = '';
+                data.upcomingBadges.forEach(badge => {
+                    const li = document.createElement('li');
+                    li.className = 'flex flex-col space-y-1';
+                    li.innerHTML = `<span class="flex items-center space-x-2"><span class="text-xl">${badge.emoji}</span><span class="text-lg font-semibold text-gray-700">${badge.title}</span></span><p class="text-gray-600 ml-7">${badge.description}</p>`;
+                    upcomingBadgesList.appendChild(li);
+                });
+                
+                showScreen('evaluation');
+            }
 
-        // Manejar el clic en los botones de pestaña
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = e.target.id.replace('tab-', '');
-                changeTab(tabId);
+            consultarBtn.addEventListener('click', () => {
+                const user = userInput.value.trim().toLowerCase();
+                if (users.includes(user)) {
+                    loadEvaluationData(user);
+                } else {
+                    loginError.classList.remove('hidden');
+                }
             });
-        });
 
-        // Manejar el clic del botón de consulta o Enter
-        function handleConsult() {
-            const username = usernameInput.value.trim();
-            if (users[username]) {
-                const userData = users[username];
-                renderReport(userData);
-                showScreen('reportScreen');
-                // Al cargar el reporte, mostrar siempre la primera pestaña
-                changeTab('resumen');
-            } else {
-                errorMessage.textContent = "Usuario no encontrado. Por favor, revisa el nombre de usuario.";
-                errorMessage.classList.remove('hidden');
-            }
-        }
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    consultarBtn.click();
+                }
+            });
 
-        consultButton.addEventListener('click', handleConsult);
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleConsult();
-            }
-        });
-
-        backButton.addEventListener('click', () => {
-            showScreen('homeScreen');
-            usernameInput.value = '';
-            errorMessage.classList.add('hidden');
-        });
-
-        function createMetricCard(metricName, metricData) {
-            const card = document.createElement('div');
-            card.className = 'flip-card bg-white p-4 rounded-2xl cursor-pointer';
-
-            const innerCard = document.createElement('div');
-            innerCard.className = 'flip-card-inner';
-
-            const front = document.createElement('div');
-            front.className = 'flip-card-front';
-            front.innerHTML = `
-                <h4 class="font-semibold text-gray-800 text-lg mb-2">${metricName}</h4>
-                <div class="mb-4">
-                    <span class="text-3xl font-bold text-blue-600">${metricData.supervision.score}%</span>
-                    <p class="text-sm text-gray-500">Supervisión</p>
-                </div>
-                <p class="text-sm text-gray-600 leading-tight">${metricData.supervision.comment}</p>
-            `;
-
-            const back = document.createElement('div');
-            back.className = 'flip-card-back';
-            back.innerHTML = `
-                <h4 class="font-semibold text-gray-800 text-lg mb-2">${metricName}</h4>
-                <div class="mb-4">
-                    <span class="text-3xl font-bold text-orange-600">${metricData.quality.score}%</span>
-                    <p class="text-sm text-gray-500">Calidad</p>
-                </div>
-                <p class="text-sm text-gray-600 leading-tight">${metricData.quality.comment}</p>
-            `;
-
-            innerCard.appendChild(front);
-            innerCard.appendChild(back);
-            card.appendChild(innerCard);
-            return card;
-        }
-
-        function createBadgeElement(badgeText) {
-            const div = document.createElement('div');
-            div.className = 'card p-4 text-center';
-            div.innerHTML = `
-                <span class="text-4xl">🏅</span>
-                <h5 class="font-semibold text-gray-800 mt-2">${badgeText}</h5>
-            `;
-            return div;
-        }
-
-        function renderReport(userData) {
-            // General
-            userNameDisplay.textContent = userData.name;
-            calificacionGeneral.textContent = `${userData.generalScore}%`;
-            metaLlamadas.textContent = `${userData.callGoal}%`;
-            comentariosSupervisor.textContent = userData.supervisorComments;
-
-            // Pestaña Resumen General
-            criteriosContainer.innerHTML = ''; // Limpiar contenedor
-            for (const metric in userData.metrics) {
-                const card = createMetricCard(metric, userData.metrics[metric]);
-                criteriosContainer.appendChild(card);
-            }
+            returnBtn.addEventListener('click', () => {
+                showScreen('login');
+                // Restablecer la primera pestaña al volver
+                document.querySelector('.tab-button.active').classList.remove('active');
+                document.querySelector('#resumen').classList.remove('hidden');
+                document.querySelector('[data-tab="resumen"]').classList.add('active');
+                document.getElementById('tendencias').classList.add('hidden');
+                document.getElementById('insignias').classList.add('hidden');
+                document.getElementById('plan').classList.add('hidden');
+            });
             
-            // Pestaña Tendencias (datos de ejemplo)
-            mayorMejora.innerHTML = 'Retención <span class="text-green-500 font-bold">+5%</span> respecto al mes anterior.';
-            comentariosMejora.textContent = 'Este mes has puesto un gran esfuerzo en retención y se nota. ¡Excelente trabajo!';
-            areaCritica.innerHTML = 'WhatsApp <span class="text-red-500 font-bold">-2%</span> respecto al mes anterior.';
-            comentariosCritica.textContent = 'Hay una leve disminución en la métrica de WhatsApp. Revisemos los tiempos de respuesta.';
-
-            // Pestaña Insignias
-            insigniasContainer.innerHTML = ''; // Limpiar contenedor
-            userData.badges.forEach(badge => {
-                const badgeEl = createBadgeElement(badge);
-                insigniasContainer.appendChild(badgeEl);
+            // Lógica de pestañas
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    
+                    const tabName = button.getAttribute('data-tab');
+                    document.getElementById(tabName).classList.remove('hidden');
+                    button.classList.add('active');
+                });
             });
 
-            fortalezasList.innerHTML = '';
-            userData.upcomingBadges.fortalezas.forEach(fortaleza => {
-                const li = document.createElement('li');
-                li.textContent = fortaleza;
-                fortalezasList.appendChild(li);
-            });
-
-            oportunidadesList.innerHTML = '';
-            userData.upcomingBadges.oportunidades.forEach(oportunidad => {
-                const li = document.createElement('li');
-                li.textContent = oportunidad;
-                oportunidadesList.appendChild(li);
-            });
-
-        }
+            // Lógica para el flip de las tarjetas (ya está integrada en el HTML con el onclick)
+        });
     </script>
 </body>
 </html>
