@@ -1,665 +1,1627 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+<html lang="es"><head><style data-merge-styles="true"></style>
+    <style data-merge-styles="true"></style><style data-merge-styles="true"></style><style data-merge-styles="true"></style><meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación Modular - CNCI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Evaluación de Desempeño</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #2a6aff; /* Azul de fondo */
-            background-image: linear-gradient(to bottom right, #2a6aff, #4d80ff);
-        }
-        .container {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2a6aff, #ff8500);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            color: #1a202c;
+            overflow: auto;
         }
-        /* Estilos de la tarjeta flip */
-        .card-container {
-            perspective: 1000px;
-        }
-        .card {
+
+        .container-wrapper {
             width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s ease;
-        }
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            color: #1a202c; /* Color de texto oscuro */
+            transition: all 0.5s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
         }
-        .card-front {
-            background-color: #f7fafc; /* Color de fondo claro para el frente */
-            z-index: 2;
-        }
-        .card-back {
-            background-color: #e2e8f0; /* Color de fondo ligeramente más oscuro para el reverso */
-            transform: rotateY(180deg);
-        }
-        .card-title {
-            font-weight: 700;
-            color: #2a6aff;
-        }
-        .card-grade {
-            font-weight: 600;
-            color: #ff8500;
-        }
-        .card-comment {
-            color: #718096; /* Gris para comentarios */
-        }
-        /* Estilos de las pestañas */
-        .tab-button {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .tab-button.active {
-            border-bottom: 3px solid #ff8500;
-            color: #ff8500;
-        }
-        /* Gráfica simple */
-        .chart-container {
-            position: relative;
+
+        .hidden-screen {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 300px;
+            height: 100%;
         }
-        .chart-container canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
+
+        .card {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
         }
-        .progress-bar-container {
-            background-color: #e2e8f0;
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.5s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+            height: 95vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Custom scrollbar */
+        .dashboard-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .dashboard-container::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 4px;
+        }
+        .dashboard-container::-webkit-scrollbar-track {
+            background-color: #f7fafc;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            transition: border-color 0.3s ease;
+            text-align: center;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #2a6aff;
+        }
+        
+        .progress-bar {
+            height: 10px;
             border-radius: 9999px;
-            height: 1rem;
+            background-color: #e2e8f0;
             overflow: hidden;
         }
-        .progress-bar {
-            background-color: #ff8500;
+
+        .progress-fill {
             height: 100%;
+            border-radius: 9999px;
             transition: width 0.5s ease-in-out;
+        }
+
+        .category-card {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.1), 0 6px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .criteria-content {
+            transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+            overflow: hidden;
+            max-height: 0;
+        }
+
+        .criteria-content.open {
+            margin-top: 1rem;
+        }
+        
+        .arrow-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .arrow-icon.open {
+            transform: rotate(180deg);
+        }
+
+        /* Styles for the trends chart container */
+        .chart-container {
+            position: relative;
+            height: 400px; /* Fixed height to prevent infinite stretch */
+            width: 100%;
+        }
+
+        /* Responsive table */
+        .table-container {
+            overflow-x: auto;
+        }
+        .admin-table {
+            width: 100%;
+            min-width: 800px; /* Minimum width for the table */
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        .admin-table th, .admin-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .admin-table th {
+            background-color: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .admin-table td {
+            vertical-align: top;
         }
     </style>
 </head>
-<body class="bg-blue-600 flex justify-center items-start min-h-screen p-4">
+<body>
 
-<!-- Ventana 1: Login -->
-<div id="login-window" class="container bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full m-4">
-    <img src="https://i.ibb.co/m5QcyKWg/Logo-CNCI.png" alt="Logo CNCI" class="h-16 mb-6">
-    <h1 class="text-4xl font-bold text-center text-blue-800 mb-2">Evaluación Modular 📊</h1>
-    <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">Departamento de Servicios Estudiantiles</h2>
-    <h3 class="text-lg font-medium text-center text-gray-500 mb-6">Módulo M8, Agosto 2025</h3>
-    <p class="text-center text-gray-600 mb-4">Consulta tu desempeño del módulo de manera detallada ingresando tu usuario Vici 👇</p>
-    <div class="w-full flex flex-col items-center">
-        <input id="username-input" type="text" placeholder="Usuario Vici (ej. Asesor01)" class="w-full p-3 mb-4 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition-all">
-        <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all transform hover:scale-105">Consultar mi Evaluación ✨</button>
+<!-- Login Screen -->
+<div id="login-screen" class="container-wrapper" style="display: flex;">
+    <div class="card max-w-md">
+        <img src="https://i.ibb.co/m5QcyKWg/Logo-CNCI.png" alt="Logo de la Universidad Virtual CNCI" class="mx-auto w-48 mb-6">
+        <h1 id="login-title" class="text-2xl font-bold mb-2">Evaluación M8</h1>
+        <h2 id="login-subtitle" class="text-xl font-semibold mb-6">Módulo M8, Agosto 2025 🗓️</h2>
+        <p id="login-description" class="text-gray-600 mb-6">Consulta tu desempeño del módulo de manera detallada ingresando tu usuario Vici.</p>
+        <div class="flex flex-col items-center gap-4">
+            <input id="user-input" type="text" placeholder="Ingresa tu usuario" class="login-input" autocomplete="off" spellcheck="false" data-ms-editor="true">
+            <button id="login-button" class="w-full bg-[#2a6aff] text-white font-semibold py-3 px-6 rounded-xl transition duration-300 ease-in-out transform hover:scale-105 hover:bg-[#1a55ff] shadow-lg">
+                Consultar mi Evaluación ✨
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- Ventana 2: Evaluación -->
-<div id="evaluation-window" class="container hidden bg-white p-8 rounded-2xl shadow-xl max-w-5xl w-full m-4">
-    <!-- Botón para volver -->
-    <button id="back-button" class="absolute top-4 right-4 text-blue-600 font-bold hover:underline transition-all transform hover:scale-105">⬅️ Volver</button>
-    <h1 class="text-4xl font-bold text-blue-800 mb-2">Resultados de Evaluación 📋</h1>
-    <div class="flex flex-col md:flex-row justify-between w-full mb-6 items-center md:items-start">
-        <div class="flex items-center">
-            <div class="flex flex-col mr-4">
-                <p class="text-xl font-bold text-gray-800" id="user-name">Nombre Asesor</p>
-                <p class="text-sm text-gray-500" id="user-id">usuarioID</p>
+<!-- Dashboard Screen -->
+<div id="dashboard-screen" class="container-wrapper hidden-screen" style="display: none;">
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div class="flex-grow">
+                <h1 id="dashboard-title" class="text-3xl font-bold mb-1">Resultados de Evaluación 📊</h1>
+                <p id="user-name" class="text-gray-500 text-lg"></p>
             </div>
-        </div>
-        <div class="flex items-center mt-4 md:mt-0">
-            <span class="bg-orange-400 text-white text-xs font-semibold px-2 py-1 rounded-full mr-2">Agosto 2025</span>
-            <span id="performance-status" class="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">Desempeño Destacado</span>
-        </div>
-    </div>
-
-    <!-- Pestañas de navegación -->
-    <div class="w-full mb-6 border-b border-gray-200 flex justify-around md:justify-start space-x-4 md:space-x-8 overflow-x-auto">
-        <button id="tab-summary" class="tab-button active text-blue-600 font-semibold py-2 px-4 transition-colors duration-300 whitespace-nowrap">Resumen General 📄</button>
-        <button id="tab-trends" class="tab-button text-gray-600 hover:text-blue-600 font-semibold py-2 px-4 transition-colors duration-300 whitespace-nowrap">Tendencias 📈</button>
-        <button id="tab-badges" class="tab-button text-gray-600 hover:text-blue-600 font-semibold py-2 px-4 transition-colors duration-300 whitespace-nowrap">Insignias 🏆</button>
-        <button id="tab-plan" class="tab-button text-gray-600 hover:text-blue-600 font-semibold py-2 px-4 transition-colors duration-300 whitespace-nowrap">Plan de Mejora 🎯</button>
-    </div>
-
-    <!-- Contenido de las pestañas -->
-    <div id="tab-content" class="w-full">
-        <!-- Pestaña: Resumen General -->
-        <div id="content-summary" class="tab-pane">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <!-- Calificación General -->
-                <div class="bg-blue-100 p-6 rounded-2xl shadow-md">
-                    <h4 class="text-lg font-bold text-blue-800 flex items-center mb-2">Calificación General 🌟</h4>
-                    <div class="text-4xl font-extrabold text-blue-600 mb-2" id="general-score">87%</div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar bg-blue-600" style="width: 87%;"></div>
-                    </div>
-                </div>
-                <!-- Meta de Llamadas -->
-                <div class="bg-orange-100 p-6 rounded-2xl shadow-md">
-                    <h4 class="text-lg font-bold text-orange-800 flex items-center mb-2">Meta de Llamadas 📞</h4>
-                    <div class="text-4xl font-extrabold text-orange-600 mb-2" id="call-goal">24</div>
-                    <p class="text-sm text-gray-500 mb-2">Del total mensual</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar bg-orange-600" style="width: 80%;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Criterios de Evaluación -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Tarjeta de ejemplo. Se clona para cada criterio. -->
-                <!-- Retención -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <!-- Frente de la tarjeta -->
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Retención</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">90%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Mantiene un excelente enfoque en la retención de estudiantes, aplicando estrategias efectivas.</p>
-                            </div>
-                        </div>
-                        <!-- Reverso de la tarjeta -->
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Retención</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">92%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: Los resultados de calidad demuestran consistencia y efectividad en las interacciones.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reincorporación -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Reincorporación</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">85%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Ha logrado reincorporar a varios estudiantes, aunque hay oportunidad para mejorar.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Reincorporación</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">80%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: Los procesos de calidad están bien documentados, pero la ejecución podría ser más ágil.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Procesos -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Procesos</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">95%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Muestra un gran dominio de los procesos internos. Un ejemplo a seguir.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Procesos</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">98%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: La calidad en el seguimiento de procesos es impecable.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Llamada -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Llamada 📞</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">92%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Habilidad sobresaliente en la gestión de llamadas, siempre atento a los detalles del estudiante.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Llamada 📞</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">90%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: Excelente calidad de atención en llamadas. Se recomienda mantener la proactividad.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- WhatsApp -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">WhatsApp 📱</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">98%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Responde de forma ágil y clara a las consultas por WhatsApp.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">WhatsApp 📱</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">95%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: La comunicación escrita es eficiente y siempre con un tono profesional y cercano.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Correo Electrónico -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Correo Electrónico 📧</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">89%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Las respuestas por correo son completas, aunque a veces tardan en ser enviadas.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Correo Electrónico 📧</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">85%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: El contenido de los correos es claro, se recomienda ser más rápido en la respuesta.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Viva Engage -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Viva Engage 🌐</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">99%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Participación activa y efectiva en la comunidad, apoyando a otros asesores y compartiendo información relevante.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Viva Engage 🌐</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">100%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: El impacto en la comunidad es muy positivo. ¡Sigue así!</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Actividades administrativas -->
-                <div class="card-container h-60">
-                    <div class="card cursor-pointer" onclick="this.classList.toggle('flipped')">
-                        <div class="card-face card-front p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Actividades Administrativas ⚙️</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">91%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Supervisión</p>
-                                <p class="text-sm card-comment">Comentario del supervisor: Mantiene un excelente registro y cumplimiento de sus tareas administrativas.</p>
-                            </div>
-                        </div>
-                        <div class="card-face card-back p-4 flex flex-col justify-between">
-                            <div>
-                                <h5 class="text-xl font-bold card-title mb-2">Actividades Administrativas ⚙️</h5>
-                                <p class="text-sm text-gray-600 mb-2">Logro: <span class="card-grade">95%</span></p>
-                                <p class="text-md font-semibold text-gray-800">Calidad</p>
-                                <p class="text-sm card-comment">Comentario de calidad: Los datos y registros son siempre precisos y se presentan en tiempo y forma.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Comentarios Generales del Supervisor -->
-            <div class="bg-gray-100 p-6 rounded-2xl shadow-md mb-8">
-                <h4 class="text-xl font-bold text-gray-800 mb-2">Comentarios Generales del Supervisor 💬</h4>
-                <p class="text-gray-600">
-                    Carlos ha demostrado un excelente desempeño este mes. Su atención al cliente es destacable y sigue los protocolos de manera consistente. Debe mejorar en los tiempos de respuesta para alcanzar los objetivos del equipo.
-                </p>
-            </div>
-
-            <!-- Botón de detalles de evaluación -->
-            <div class="flex justify-center">
-                <button onclick="window.open('https://www.cnci.edu.mx/detalles-evaluacion', '_blank')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all transform hover:scale-105">Detalles de Evaluación 🔍</button>
-            </div>
+            <button id="logout-button" class="mt-4 md:mt-0 bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-300 transform hover:scale-105">
+                Volver ↩️
+            </button>
         </div>
 
-        <!-- Pestaña: Tendencias -->
-        <div id="content-trends" class="tab-pane hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Evolución de Desempeño Anual 📈</h2>
-            <div class="chart-container mb-8">
-                <canvas id="performance-chart"></canvas>
+        <!-- Dashboard Tabs -->
+        <div class="flex justify-between items-center bg-gray-100 p-2 rounded-xl mb-6 flex-wrap">
+            <button class="tab-button w-1/4 py-3 px-2 rounded-xl text-sm md:text-base transition-colors duration-200" data-tab="resumen">Resumen General 📄</button>
+            <button class="tab-button w-1/4 py-3 px-2 rounded-xl text-sm md:text-base transition-colors duration-200" data-tab="tendencias">Tendencias 📈</button>
+            <button class="tab-button w-1/4 py-3 px-2 rounded-xl text-sm md:text-base transition-colors duration-200" data-tab="insignias">Insignias 🎖️</button>
+            <button class="tab-button w-1/4 py-3 px-2 rounded-xl text-sm md:text-base transition-colors duration-200" data-tab="plan">Plan de Trabajo 💡</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content">
+            <!-- Resumen General Tab -->
+            <div id="resumen-content" class="tab-page">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Calificación General -->
+                    <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-4">Calificación General ⭐</h3>
+                        <div class="flex items-center gap-4">
+                            <span id="general-score" class="text-2xl font-bold text-[#2a6aff]">9.2</span>
+                            <div class="progress-bar flex-grow">
+                                <div id="general-progress" class="progress-fill bg-[#2a6aff]" style="width: 92%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Meta de Llamadas -->
+                    <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-4">Meta de Llamadas 📞</h3>
+                        <div class="flex items-center gap-4">
+                            <span id="calls-score" class="text-2xl font-bold text-[#ff8500]">8.5</span>
+                            <div class="progress-bar flex-grow">
+                                <div id="calls-progress" class="progress-fill bg-[#ff8500]" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categorías y Criterios de Evaluación -->
+                <div id="categorias-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Cards will be injected here by JavaScript -->
+                </div>
+
+                <!-- Comentarios Generales -->
+                <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+                    <h3 class="text-xl font-semibold mb-4 text-left">Comentarios generales del Supervisor 📝</h3>
+                    <p class="text-gray-700 text-left" id="general-comments"></p>
+                </div>
+                <div class="flex justify-center">
+                    <a id="eval-details-link" href="#" target="_blank" class="bg-[#ff8500] text-white font-semibold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105 hover:bg-[#ff7a00] shadow-lg">
+                        Detalles de Evaluación 🔍
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tendencias Tab -->
+            <div id="tendencias-content" class="tab-page hidden">
+                <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Gráfica Anual de Desempeño 🗓️</h2>
+                    <div class="chart-container">
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+                    <div class="flex flex-wrap gap-4 justify-center mt-4" id="chart-buttons-container">
+                        <!-- Category buttons will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Comparativa Mensual -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-2">Hace 2 Meses </h3>
+                        <p class="text-3xl font-bold text-center" id="score-2-months-ago"></p>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-2">Mes Anterior</h3>
+                        <p class="text-3xl font-bold text-center" id="score-last-month"></p>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-xl font-semibold mb-2">Mes Actual </h3>
+                        <p class="text-3xl font-bold text-center" id="score-this-month"></p>
+                    </div>
+                </div>
+
+                <!-- Métricas Destacadas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-green-100 p-6 rounded-2xl shadow-sm border border-green-300">
+                        <h3 class="text-xl font-semibold mb-2 flex items-center gap-2">La Mayor Mejora ✅</h3>
+                        <p class="text-gray-700" id="major-improvement-text"></p>
+                    </div>
+                    <div class="bg-red-100 p-6 rounded-2xl shadow-sm border border-red-300">
+                        <h3 class="text-xl font-semibold mb-2 flex items-center gap-2">Área Crítica ⚠️</h3>
+                        <p class="text-gray-700" id="critical-area-text"></p>
+                    </div>
+                </div>
             </div>
             
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Comparativa Mensual 📊</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Mes - 2 -->
-                <div class="bg-blue-100 p-4 rounded-xl shadow-md">
-                    <p class="text-sm text-gray-600 mb-2">Julio</p>
-                    <div class="flex items-center">
-                        <p class="text-3xl font-bold text-blue-800 mr-2">82%</p>
-                        <span class="text-xl">📈</span>
-                        <p class="text-sm text-green-600 ml-2">+2%</p>
-                    </div>
+            <!-- Insignias Tab -->
+            <div id="insignias-content" class="tab-page hidden">
+                <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Tus Insignias 🏆</h2>
+                    <ul id="badges-list" class="space-y-4 text-left">
+                        <!-- Badges will be injected here -->
+                    </ul>
                 </div>
-                <!-- Mes - 1 -->
-                <div class="bg-blue-100 p-4 rounded-xl shadow-md">
-                    <p class="text-sm text-gray-600 mb-2">Agosto</p>
-                    <div class="flex items-center">
-                        <p class="text-3xl font-bold text-blue-800 mr-2">85%</p>
-                        <span class="text-xl">📈</span>
-                        <p class="text-sm text-green-600 ml-2">+3%</p>
-                    </div>
-                </div>
-                <!-- Mes Actual -->
-                <div class="bg-blue-100 p-4 rounded-xl shadow-md">
-                    <p class="text-sm text-gray-600 mb-2">Septiembre</p>
-                    <div class="flex items-center">
-                        <p class="text-3xl font-bold text-blue-800 mr-2">87%</p>
-                        <span class="text-xl">📈</span>
-                        <p class="text-sm text-green-600 ml-2">+2%</p>
-                    </div>
+                <div class="bg-gray-100 p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4">Próximas Insignias 🚀</h2>
+                    <ul id="next-badges-list" class="space-y-4 text-left">
+                        <!-- Next badges will be injected here -->
+                    </ul>
                 </div>
             </div>
 
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Métricas Destacadas ✨</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- La mayor mejora -->
-                <div class="bg-orange-100 p-6 rounded-xl shadow-md">
-                    <h4 class="text-lg font-bold text-orange-800 flex items-center mb-2">La mayor mejora 🚀</h4>
-                    <p class="text-md text-gray-800 font-semibold mb-2">Calidad de Atención</p>
-                    <p class="text-sm text-green-600 font-semibold mb-2">+8% desde el mes anterior</p>
-                    <p class="text-sm text-gray-600">Comentario del supervisor: La iniciativa de Carlos para mejorar la calidad de atención ha rendido frutos, demostrando un progreso significativo en este aspecto.</p>
+            <!-- Plan de Trabajo Tab -->
+            <div id="plan-content" class="tab-page hidden">
+                <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Plan de Mejora 🎯</h2>
+                    <p class="text-gray-700 text-left" id="plan-instructions"></p>
                 </div>
-                <!-- Área Crítica -->
-                <div class="bg-red-100 p-6 rounded-xl shadow-md">
-                    <h4 class="text-lg font-bold text-red-800 flex items-center mb-2">Área Crítica ⚠️</h4>
-                    <p class="text-md text-gray-800 font-semibold mb-2">Tiempo de Respuesta</p>
-                    <p class="text-sm text-red-600 font-semibold mb-2">-2% desde el mes anterior</p>
-                    <p class="text-sm text-gray-600">Comentario del supervisor: Se ha observado una ligera disminución en el tiempo de respuesta promedio. Es un área clave para enfocarse en el próximo módulo.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pestaña: Insignias -->
-        <div id="content-badges" class="tab-pane hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Insignias Obtenidas 🥇</h2>
-            <ul class="space-y-4 mb-8">
-                <li class="flex items-center p-4 bg-gray-100 rounded-xl shadow-sm">
-                    <span class="text-2xl mr-4">🏆</span>
-                    <p class="text-lg font-semibold text-gray-800">Maestro(a) de Procesos</p>
-                </li>
-                <li class="flex items-center p-4 bg-gray-100 rounded-xl shadow-sm">
-                    <span class="text-2xl mr-4">🎯</span>
-                    <p class="text-lg font-semibold text-gray-800">Guardián de la Retención</p>
-                </li>
-                <li class="flex items-center p-4 bg-gray-100 rounded-xl shadow-sm">
-                    <span class="text-2xl mr-4">🤝</span>
-                    <p class="text-lg font-semibold text-gray-800">Solucionador(a) de Conflictos</p>
-                </li>
-            </ul>
-
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Próximas Insignias 🚀</h2>
-            <div class="bg-gray-100 p-6 rounded-2xl shadow-md">
-                <p class="font-semibold text-lg text-gray-800 mb-2">Próximas Insignias ✨</p>
-                <ul class="space-y-2 text-gray-600">
-                    <li class="flex items-start">
-                        <span class="text-lg mr-2">💨</span>
-                        <div>
-                            <p class="font-bold">Respuesta Rápida:</p>
-                            <p>Mejorar el tiempo de respuesta a menos de 2 minutos en WhatsApp y correo electrónico.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="text-lg mr-2">💰</span>
-                        <div>
-                            <p class="font-bold">Ventas Estrella:</p>
-                            <p>Alcanzar un 90% en métricas de ventas. ¡Pronto!</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Pestaña: Plan de Mejora -->
-        <div id="content-plan" class="tab-pane hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Plan de Mejora 🛠️</h2>
-            <div class="bg-gray-100 p-6 rounded-2xl shadow-md">
-                <p class="text-gray-700 leading-relaxed">
-                    A partir de los resultados de tu evaluación, identifica de 3 a 4 áreas de oportunidad y describe acciones concretas que puedas implementar para mejorarlas. Indica el plazo estimado y cómo darás seguimiento a cada acción. Sé específico y realista para facilitar el cumplimiento y la evaluación de avances. Ingresa al siguiente enlace, redacta y establece tu plan de mejora antes del 11 de septiembre de 2025.
-                </p>
-            </div>
-            <div class="flex justify-center mt-6">
-                <button onclick="window.open('https://docs.google.com/document/d/1B0Zt-X4p5oA8vE2uJjF7qL8p0YqH6mD7/edit?usp=sharing', '_blank')" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all transform hover:scale-105">Crear mi Plan de Mejora 📝</button>
+                <a id="plan-link" href="#" target="_blank" class="w-full md:w-auto bg-[#2a6aff] text-white font-semibold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105 hover:bg-[#1a55ff] shadow-lg inline-block">
+                    Crear mi Plan de Trabajo 📝
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- LIBRERÍAS JS -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- LÓGICA DE LA APLICACIÓN -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const loginWindow = document.getElementById('login-window');
-        const evaluationWindow = document.getElementById('evaluation-window');
-        const loginButton = document.getElementById('login-button');
-        const usernameInput = document.getElementById('username-input');
-        const backButton = document.getElementById('back-button');
-
-        const tabs = {
-            summary: document.getElementById('tab-summary'),
-            trends: document.getElementById('tab-trends'),
-            badges: document.getElementById('tab-badges'),
-            plan: document.getElementById('tab-plan')
-        };
-        const tabPanes = {
-            summary: document.getElementById('content-summary'),
-            trends: document.getElementById('content-trends'),
-            badges: document.getElementById('content-badges'),
-            plan: document.getElementById('content-plan')
-        };
-
-        const userData = {
-            'asesor01': { name: 'Carlos Rodríguez', generalScore: 87, callGoal: 24, performance: 'Destacado', trendData: [82, 85, 87] },
-            'asesor02': { name: 'Ana Sánchez', generalScore: 92, callGoal: 28, performance: 'Excelente', trendData: [85, 88, 92] },
-            'asesor03': { name: 'Luis Pérez', generalScore: 75, callGoal: 18, performance: 'Necesita Mejora', trendData: [70, 72, 75] },
-            'asesor04': { name: 'María López', generalScore: 81, callGoal: 22, performance: 'Bueno', trendData: [80, 81, 81] },
-            'asesor05': { name: 'Javier García', generalScore: 95, callGoal: 30, performance: 'Ejemplar', trendData: [90, 93, 95] },
-            'asesor06': { name: 'Sofía Martínez', generalScore: 78, callGoal: 19, performance: 'Satisfactorio', trendData: [78, 77, 78] },
-            'asesor07': { name: 'Diego Hernández', generalScore: 84, callGoal: 25, performance: 'Bueno', trendData: [82, 83, 84] },
-            'asesor08': { name: 'Paula Días', generalScore: 89, callGoal: 26, performance: 'Destacado', trendData: [87, 88, 89] },
-            'asesor09': { name: 'Felipe Reyes', generalScore: 79, callGoal: 20, performance: 'Satisfactorio', trendData: [75, 78, 79] },
-            'asesor10': { name: 'Valeria Castro', generalScore: 86, callGoal: 23, performance: 'Bueno', trendData: [85, 86, 86] },
-            'asesor11': { name: 'Ricardo Morales', generalScore: 91, callGoal: 27, performance: 'Excelente', trendData: [89, 90, 91] },
-            'asesor12': { name: 'Isabel Torres', generalScore: 74, callGoal: 17, performance: 'Necesita Mejora', trendData: [75, 74, 74] },
-            'asesor13': { name: 'Gustavo Ramirez', generalScore: 83, callGoal: 21, performance: 'Bueno', trendData: [82, 82, 83] },
-            'asesor14': { name: 'Renata Vargas', generalScore: 88, callGoal: 24, performance: 'Destacado', trendData: [86, 87, 88] },
-            'asesor15': { name: 'Omar Jimenez', generalScore: 90, callGoal: 25, performance: 'Excelente', trendData: [88, 89, 90] },
-            'asesor16': { name: 'Liliana Rojas', generalScore: 80, callGoal: 21, performance: 'Satisfactorio', trendData: [79, 80, 80] },
-            'asesor17': { name: 'Héctor Soto', generalScore: 85, callGoal: 23, performance: 'Bueno', trendData: [84, 85, 85] },
-            'asesor18': { name: 'Gabriela Mendiola', generalScore: 93, callGoal: 29, performance: 'Ejemplar', trendData: [91, 92, 93] }
-        };
+<!-- Admin Panel Screen -->
+<div id="admin-screen" class="container-wrapper hidden-screen" style="display: none;">
+    <div class="dashboard-container">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold flex items-center gap-2">
+                Panel de Administrador ⚙️
+            </h1>
+            <div class="flex items-center gap-2">
+                <button id="add-user-btn" class="bg-green-500 text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-green-600">
+                    Añadir Usuario
+                </button>
+                <button id="admin-logout-button" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-300 transform hover:scale-105">
+                    Volver al login ↩️
+                </button>
+                <button id="empty-table-btn" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-red-600">
+                    Vaciar tabla 🗑️
+                </button>
+            </div>
+        </div>
         
-        let myChart;
+        <!-- Sección de Edición General -->
+        <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">Edición General 📄</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Título de Login</label>
+                    <input type="text" id="admin-login-title" class="w-full p-2 rounded-lg border border-gray-300" placeholder="Título de la pantalla de login" spellcheck="false" data-ms-editor="true">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Subtítulo de Login</label>
+                    <input type="text" id="admin-login-subtitle" class="w-full p-2 rounded-lg border border-gray-300" placeholder="Subtítulo de la pantalla de login" spellcheck="false" data-ms-editor="true">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 font-semibold mb-1">Descripción de Login</label>
+                    <textarea id="admin-login-description" class="w-full p-2 rounded-lg border border-gray-300" rows="3" placeholder="Descripción de la pantalla de login" spellcheck="false" data-ms-editor="true"></textarea>
+                </div>
+            </div>
+            <button id="save-general-settings-btn" class="mt-4 bg-[#2a6aff] text-white font-semibold py-2 px-4 rounded-lg transition duration-300 hover:bg-[#1a55ff]">
+                Guardar Cambios
+            </button>
+        </div>
 
-        // Función para cambiar de ventana
-        const showEvaluation = (user) => {
-            const data = userData[user.toLowerCase()];
-            if (data) {
-                // Actualizar la información del usuario en la ventana de evaluación
-                document.getElementById('user-name').textContent = data.name;
-                document.getElementById('user-id').textContent = user.toLowerCase();
-                document.getElementById('general-score').textContent = `${data.generalScore}%`;
-                document.getElementById('call-goal').textContent = data.callGoal;
-                document.getElementById('performance-status').textContent = `Desempeño ${data.performance}`;
-                
-                // Actualizar barra de progreso
-                document.querySelector('#content-summary .progress-bar.bg-blue-600').style.width = `${data.generalScore}%`;
+        <!-- Tabla de Edición de Usuarios -->
+        <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">Tabla de Edición de Usuarios 👥</h2>
+            <div class="table-container">
+                <table id="users-table" class="admin-table">
+                    <thead>
+                        <tr>
+                            <th class="w-1/12">Usuario</th>
+                            <th class="w-2/12">Nombre</th>
+                            <th class="w-1/12">Puntaje General</th>
+                            <th class="w-1/12">Meta de Llamadas</th>
+                            <th class="w-4/12">Comentarios</th>
+                            <th class="w-2/12">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
 
-                // Actualizar tarjetas de métricas
-                const metricCards = [
-                    { selector: '.card-container:nth-child(1) .card-grade', front: '90%', back: '92%' }, // Retención
-                    { selector: '.card-container:nth-child(2) .card-grade', front: '85%', back: '80%' }, // Reincorporación
-                    { selector: '.card-container:nth-child(3) .card-grade', front: '95%', back: '98%' }, // Procesos
-                    { selector: '.card-container:nth-child(4) .card-grade', front: '92%', back: '90%' }, // Llamada
-                    { selector: '.card-container:nth-child(5) .card-grade', front: '98%', back: '95%' }, // WhatsApp
-                    { selector: '.card-container:nth-child(6) .card-grade', front: '89%', back: '85%' }, // Correo
-                    { selector: '.card-container:nth-child(7) .card-grade', front: '99%', back: '100%' }, // Viva Engage
-                    { selector: '.card-container:nth-child(8) .card-grade', front: '91%', back: '95%' } // Actividades
-                ];
-                
-                metricCards.forEach(card => {
-                    const frontGrade = document.querySelector(card.selector);
-                    const backGrade = document.querySelector(card.selector.replace('.card-front', '.card-back'));
-                    if (frontGrade) frontGrade.textContent = card.front;
-                    if (backGrade) backGrade.textContent = card.back;
+        <!-- Sección de Edición de Categorías y Criterios -->
+        <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+            <h2 class="text-xl font-bold mb-4">Edición de Categorías y Criterios de Evaluación 📝</h2>
+            <p class="text-gray-700 mb-4">Los cambios realizados aquí se aplicarán a la plantilla de todos los usuarios.</p>
+            <button id="edit-categories-btn" class="bg-[#ff8500] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#ff7a00]">
+                Editar Categorías y Criterios
+            </button>
+        </div>
+        
+        <!-- Sección de Edición de Tendencias -->
+        <div class="bg-gray-100 p-6 rounded-2xl shadow-sm mb-6">
+            <h2 class="text-xl font-bold mb-4">Edición de Tendencias 📈</h2>
+            <p class="text-gray-700 mb-4">Añade, edita o elimina las categorías del gráfico de líneas.</p>
+            <button id="edit-trends-btn" class="bg-[#4ade80] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#34d399]">
+                Editar Categorías de Tendencias
+            </button>
+        </div>
+        
+        <!-- Botón de Descarga -->
+        <div class="flex justify-center mt-8 mb-4">
+             <button id="admin-download-report-btn" class="bg-gray-600 text-white font-semibold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105 hover:bg-gray-700 shadow-lg">
+                Generar y Descargar Reporte 📥
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-container" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white p-8 rounded-xl shadow-lg text-center max-w-sm w-full">
+        <h3 id="modal-title" class="text-xl font-bold mb-4">Configuración Guardada</h3>
+        <p id="modal-message" class="text-gray-700 mb-6">Los textos de la pantalla de login han sido actualizados.</p>
+        <button id="modal-ok-button" class="bg-[#2a6aff] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#1a55ff]">
+            Aceptar
+        </button>
+    </div>
+</div>
+
+<!-- Modal para añadir/editar usuario -->
+<div id="user-modal-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+        <h3 id="user-modal-title" class="text-2xl font-bold mb-4 text-center">Añadir Nuevo Usuario</h3>
+        <form id="user-form" class="space-y-4">
+            <div>
+                <label for="form-id" class="block text-sm font-medium text-gray-700">Usuario ID</label>
+                <input type="text" id="form-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required="" spellcheck="false" data-ms-editor="true">
+            </div>
+            <div>
+                <label for="form-name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="form-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required="" spellcheck="false" data-ms-editor="true">
+            </div>
+            <div>
+                <label for="form-role" class="block text-sm font-medium text-gray-700">Rol</label>
+                <select id="form-role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    <option value="user">Usuario</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+            <div>
+                <label for="form-general-score" class="block text-sm font-medium text-gray-700">Puntaje General</label>
+                <input type="number" step="0.1" min="0" max="10" id="form-general-score" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+            </div>
+            <div>
+                <label for="form-calls-score" class="block text-sm font-medium text-gray-700">Meta de Llamadas</label>
+                <input type="number" step="0.1" min="0" max="10" id="form-calls-score" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+            </div>
+            <div>
+                <label for="form-comments" class="block text-sm font-medium text-gray-700">Comentarios</label>
+                <textarea id="form-comments" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" spellcheck="false" data-ms-editor="true"></textarea>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="button" id="user-modal-cancel" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+                <button type="submit" id="user-modal-save" class="bg-[#2a6aff] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#1a55ff]">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de detalles de usuario -->
+<div id="details-modal-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-2xl w-full h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="details-modal-title" class="text-2xl font-bold">Detalles de Usuario</h3>
+            <button type="button" id="details-modal-cancel-top" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+        </div>
+        <form id="details-form" class="space-y-6">
+            <!-- Sección de Títulos y Enlaces -->
+            <div class="bg-gray-100 p-4 rounded-xl">
+                <h4 class="text-lg font-semibold mb-2">Títulos y Enlaces del Dashboard</h4>
+                <div class="space-y-2">
+                    <label class="block">
+                        <span class="text-sm">Título del Dashboard:</span>
+                        <input type="text" id="details-dashboard-title" class="w-full mt-1 p-2 rounded-lg border" spellcheck="false" data-ms-editor="true">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm">Enlace 'Detalles de Evaluación':</span>
+                        <input type="url" id="details-eval-link" class="w-full mt-1 p-2 rounded-lg border">
+                    </label>
+                    <label class="block">
+                        <span class="text-sm">Enlace 'Plan de Trabajo':</span>
+                        <input type="url" id="details-plan-link" class="w-full mt-1 p-2 rounded-lg border">
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Sección de Comentarios y Métricas -->
+            <div class="bg-gray-100 p-4 rounded-xl">
+                <h4 class="text-lg font-semibold mb-2">Comentarios y Métricas</h4>
+                <label class="block">
+                    <span class="text-sm">Comentarios Generales del Supervisor:</span>
+                    <textarea id="details-general-comments" rows="3" class="w-full mt-1 p-2 rounded-lg border" spellcheck="false" data-ms-editor="true"></textarea>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Mayor Mejora:</span>
+                    <textarea id="details-improvement" rows="2" class="w-full mt-1 p-2 rounded-lg border" spellcheck="false" data-ms-editor="true"></textarea>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Área Crítica:</span>
+                    <textarea id="details-critical-area" rows="2" class="w-full mt-1 p-2 rounded-lg border" spellcheck="false" data-ms-editor="true"></textarea>
+                </label>
+                <label class="block">
+                    <span class="text-sm">Instrucciones del Plan de Trabajo:</span>
+                    <textarea id="details-plan-instructions" rows="2" class="w-full mt-1 p-2 rounded-lg border" spellcheck="false" data-ms-editor="true"></textarea>
+                </label>
+            </div>
+
+            <!-- Sección de Tendencias (Datos de la Gráfica) -->
+            <div class="bg-gray-100 p-4 rounded-xl">
+                <h4 class="text-lg font-semibold mb-2">Datos de Tendencias (Gráfica)</h4>
+                <div id="trends-form-container" class="space-y-4">
+                    <!-- Dynamic trend inputs will be injected here -->
+                </div>
+            </div>
+
+            <!-- Sección de Categorías y Criterios -->
+            <div id="criteria-form-container" class="space-y-4">
+                <!-- Dynamic category/criteria inputs will be injected here -->
+            </div>
+
+            <div class="flex justify-between gap-4 mt-6">
+                <button type="button" id="details-modal-cancel" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+                <button type="submit" id="details-modal-save" class="bg-[#2a6aff] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#1a55ff]">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Vaciar Tabla -->
+<div id="confirm-modal-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-xl shadow-lg text-center max-w-sm w-full">
+        <h3 class="text-xl font-bold mb-4 text-red-600">⚠️ Confirmar Eliminación</h3>
+        <p class="text-gray-700 mb-6">¿Estás seguro de que deseas eliminar TODOS los datos de la tabla? Esta acción no se puede deshacer.</p>
+        <div class="flex justify-center gap-4">
+            <button id="confirm-empty-btn" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-red-600">Sí, estoy seguro</button>
+            <button id="cancel-empty-btn" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Edición de Categorías/Criterios -->
+<div id="categories-modal-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold mb-4 text-center">Edición de Categorías</h3>
+        <form id="categories-form" class="space-y-4">
+            <div id="categories-list-container" class="space-y-4">
+                <!-- Categories will be injected here -->
+            </div>
+            <button type="button" id="add-category-btn" class="w-full bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition duration-300 hover:bg-gray-300">
+                Añadir Nueva Categoría
+            </button>
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="button" id="categories-modal-cancel" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+                <button type="submit" id="categories-modal-save" class="bg-[#2a6aff] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#1a55ff]">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Edición de Tendencias -->
+<div id="trends-modal-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full h-[90vh] overflow-y-auto">
+        <h3 class="text-2xl font-bold mb-4 text-center">Edición de Tendencias</h3>
+        <form id="trends-form" class="space-y-4">
+            <div id="trends-list-container" class="space-y-4">
+                <!-- Trends will be injected here -->
+            </div>
+            <button type="button" id="add-trend-btn" class="w-full bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition duration-300 hover:bg-gray-300">
+                Añadir Nueva Tendencia
+            </button>
+            <div class="flex justify-end gap-4 mt-6">
+                <button type="button" id="trends-modal-cancel" class="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-gray-400">Cancelar</button>
+                <button type="submit" id="trends-modal-save" class="bg-[#2a6aff] text-white font-semibold py-2 px-6 rounded-full transition duration-300 hover:bg-[#1a55ff]">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Se simula una base de datos local
+    let database = {
+        users: {
+            'usuario01': {
+                id: 'usuario01',
+                name: 'Ana Sofía Gutiérrez',
+                role: 'user',
+                generalScore: 9.2,
+                callsScore: 8.5,
+                generalComments: 'Pedro, has demostrado un excelente desempeño este mes. Tu atención a los alumnos es destacable y sigues los procesos de manera consistente. Debes mejorar en los tiempos de respuesta para alcanzar los objetivos del equipo.',
+                dashboardTitle: 'Resultados de Evaluación 📊',
+                evalDetailsLink: 'https://example.com/detalles/usuario01',
+                planLink: 'https://example.com/plan-de-trabajo/usuario01',
+                improvement: 'Incremento del 5% en la tasa de reincorporación, superando la meta del equipo.',
+                criticalArea: 'Mantener la agilidad en respuestas de WhatsApp durante picos de alta demanda.',
+                planInstructions: 'Instrucciones para el Plan de Trabajo. A partir de los resultados de tu evaluación, identifica de 3 a 4 áreas de oportunidad y describe acciones concretas que puedas implementar para mejorarlas. Indica el plazo estimado y cómo darás seguimiento a cada acción. Sé específico y realista para facilitar el cumplimiento y la evaluación de avances. Ingresa al siguiente enlace, redacta y establece tu plan de trabajo antes del 11 de septiembre de 2025.',
+                monthlyScores: {
+                    'Hace 2 Meses': '8.5 📉',
+                    'Mes Anterior': '9.1 📈',
+                    'Mes Actual': '9.2 📈'
+                }
+            },
+            'admin': {
+                id: 'admin',
+                name: 'Administrador',
+                role: 'admin',
+                generalScore: 0,
+                callsScore: 0,
+                generalComments: '',
+                dashboardTitle: 'Panel de Administrador ⚙️'
+            }
+        },
+        evaluationData: [
+            {
+                category: 'RETENCIÓN',
+                emoji: '🤝',
+                colors: ['#2a6aff', '#4f8bff'],
+                comments: {
+                    supervision: 'Se cumplió la meta del mes. Se ha visto un aumento en el porcentaje de retención.',
+                    quality: 'La calidad del seguimiento a la población morosa es alta y se ha reflejado en los resultados.'
+                },
+                criteria: [
+                    { name: 'Seguimiento a población morosa', score: 9.0 },
+                    { name: 'Total de bajas de alumnos con morosidad', score: 8.5 },
+                    { name: 'Uso adecuado y oportuno de la columna de retención de CRM...', score: 10.0 },
+                    { name: 'Retención y bajas pagadas', score: 9.0 }
+                ]
+            },
+            {
+                category: 'REINCORPORACIÓN',
+                emoji: '🔄',
+                colors: ['#ff8500', '#ffb050'],
+                comments: {
+                    supervision: 'Se superó la meta de reingresos. Se recomienda mantener el enfoque en la búsqueda y difusión de promociones.',
+                    quality: 'Los registros y seguimientos se realizan de manera detallada y completa.'
+                },
+                criteria: [
+                    { name: 'Bajas por no pago', score: 10.0 },
+                    { name: 'Búsqueda y difusión de promociones', score: 9.0 },
+                    { name: 'Registro y seguimiento', score: 10.0 },
+                    { name: 'Cierre de prospectos', score: 8.0 },
+                    { name: 'Total de reingresos', score: 9.5 }
+                ]
+            },
+            {
+                category: 'PROCESOS',
+                emoji: '⚙️',
+                colors: ['#4ade80', '#86efac'],
+                comments: {
+                    supervision: 'Excelente manejo de los procesos académicos y atención al detalle en la búsqueda de alumnos.',
+                    quality: 'Se nota la consistencia en los procesos, lo que facilita el trabajo de otros departamentos.'
+                },
+                criteria: [
+                    { name: 'Búsqueda de alumnos por estatus y perfil: semana 1 a la semana 4', score: 10.0 },
+                    { name: 'Procesos académicos: Cambio de carrera y/o programa, Cambio de modelo educativo...', score: 10.0 }
+                ]
+            },
+            {
+                category: 'WHATSAPP',
+                emoji: '📱',
+                colors: ['#8b5cf6', '#a78bfa'],
+                comments: {
+                    supervision: 'Buen desempeño en la respuesta de mensajes, aunque se debe mejorar en la agilidad en horarios pico.',
+                    quality: 'El mensaje es claro y la redacción es impecable, se mantiene la comunicación formal.'
+                },
+                criteria: [
+                    { name: 'Se mantiene en línea durante todo el horario laboral. ', score: 9.0 },
+                    { name: 'Se responde a todos los mensajes entrantes.', score: 8.0 },
+                    { name: 'Se da seguimiento oportuno a los casos que se atienden por WhatsApp.', score: 8.5 },
+                    { name: 'La redacción es impecable y sin errores ortográficos.', score: 10.0 },
+                ]
+            },
+            {
+                category: 'COMUNICACIÓN INTERNA',
+                emoji: '💬',
+                colors: ['#f97316', '#fb923c'],
+                comments: {
+                    supervision: 'Comunicación efectiva con los diferentes departamentos. Se recomienda ser más proactivo en la colaboración.',
+                    quality: 'El trabajo en equipo es destacable, se nota la sinergia en los casos complejos.'
+                },
+                criteria: [
+                    { name: 'Trabajo en equipo', score: 9.0 },
+                    { name: 'Interacción con el equipo', score: 8.0 },
+                    { name: 'Comunicación asertiva con el supervisor', score: 10.0 },
+                    { name: 'Colaboración en general', score: 9.5 }
+                ]
+            }
+        ],
+        trendsData: {
+            'RETENCIÓN': [8.5, 8.6, 8.8, 8.7, 8.9, 9.0, 9.1, 9.0, 9.2, 9.3, 9.4, 9.5],
+            'REINCORPORACIÓN': [7.0, 7.5, 8.0, 8.5, 8.8, 9.0, 9.2, 9.1, 9.3, 9.4, 9.6, 9.8],
+            'PROCESOS': [9.0, 9.1, 9.2, 9.3, 9.5, 9.6, 9.5, 9.7, 9.8, 9.9, 10.0, 10.0],
+            'WHATSAPP': [7.5, 8.0, 8.2, 8.5, 8.7, 8.8, 8.9, 9.0, 9.2, 9.1, 9.3, 9.5],
+            'COMUNICACIÓN INTERNA': [8.0, 8.2, 8.5, 8.7, 8.8, 9.0, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6]
+        },
+        trendsColors: {
+            'RETENCIÓN': '#2a6aff',
+            'REINCORPORACIÓN': '#ff8500',
+            'PROCESOS': '#4ade80',
+            'WHATSAPP': '#8b5cf6',
+            'COMUNICACIÓN INTERNA': '#f97316'
+        },
+        loginTexts: {
+            title: 'Evaluación Modular – Departamento de Servicios Estudiantiles',
+            subtitle: 'Módulo M8, Agosto 2025 🗓️',
+            description: 'Consulta tu desempeño del módulo de manera detallada ingresando tu usuario Vici.'
+        },
+        badges: [
+            { icon: '🏆', title: 'Maestro(a) de Procesos', description: 'Representa la excelencia en el seguimiento de todos los procesos administrativos y académicos.' },
+            { icon: '🏅', title: 'Campeón(a) de Retención', description: 'Reconoce un alto porcentaje de alumnos retenidos, evitando bajas por morosidad.' },
+            { icon: '🎖️', title: 'Experto(a) en WhatsApp', description: 'Premia la habilidad para gestionar eficientemente las conversaciones y consultas a través de WhatsApp.' },
+            { icon: '🌟', title: 'Estrella del Módulo', description: 'Otorga el reconocimiento por un desempeño integral y sobresaliente durante el módulo.' }
+        ],
+        nextBadges: [
+            { icon: '⭐', title: 'Fortaleza', description: 'Mantener consistencia en procesos de reincorporación.', meta: 'Alcanzar el 95% de reincorporación.' },
+            { icon: '⭐', title: 'Fortaleza', description: 'Mejorar el tiempo de respuesta en llamadas.', meta: 'Reducir el tiempo promedio a 1 minuto y 30 segundos.' }
+        ]
+    };
+
+    // Agregar usuarios de ejemplo para la tabla
+    for (let i = 1; i <= 18; i++) {
+        const userId = `usuario${String(i).padStart(2, '0')}`;
+        const name = `Usuario ${String(i).padStart(2, '0')}`;
+        if (!database.users[userId]) {
+            database.users[userId] = {
+                id: userId,
+                name: name,
+                role: 'user',
+                generalScore: (Math.random() * 3 + 7).toFixed(1), // Random score between 7 and 10
+                callsScore: (Math.random() * 3 + 7).toFixed(1), // Random score between 7 and 10
+                generalComments: `Comentarios generales para el ${name}.`,
+                dashboardTitle: 'Resultados de Evaluación 📊',
+                evalDetailsLink: `https://example.com/detalles/${userId}`,
+                planLink: `https://example.com/plan-de-trabajo/${userId}`,
+                improvement: `La mayor mejora para ${name} es...`,
+                criticalArea: `El área crítica para ${name} es...`,
+                planInstructions: `Instrucciones del plan de mejora para ${name}.`,
+                monthlyScores: {
+                    'Hace 2 Meses': `${(Math.random() * 3 + 7).toFixed(1)} ${Math.random() > 0.5 ? '📈' : '📉'}`,
+                    'Mes Anterior': `${(Math.random() * 3 + 7).toFixed(1)} ${Math.random() > 0.5 ? '📈' : '📉'}`,
+                    'Mes Actual': `${(Math.random() * 3 + 7).toFixed(1)} ${Math.random() > 0.5 ? '📈' : '📉'}`
+                }
+            };
+        }
+    }
+
+    // Funciones de persistencia en localStorage
+    function saveDatabase() {
+        localStorage.setItem('evaluationDatabase', JSON.stringify(database));
+    }
+
+    function loadDatabase() {
+        const savedData = localStorage.getItem('evaluationDatabase');
+        if (savedData) {
+            database = JSON.parse(savedData);
+        }
+    }
+
+    // Cargar la base de datos al inicio
+    loadDatabase();
+
+    let currentUser = null;
+    let chartInstance = null;
+    let editingRow = null;
+
+    // Elementos de la UI
+    const loginScreen = document.getElementById('login-screen');
+    const dashboardScreen = document.getElementById('dashboard-screen');
+    const adminScreen = document.getElementById('admin-screen');
+    const userInput = document.getElementById('user-input');
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button');
+    const adminLogoutButton = document.getElementById('admin-logout-button');
+    const userNameElement = document.getElementById('user-name');
+    const tabs = document.querySelectorAll('.tab-button');
+    const categoriasContainer = document.getElementById('categorias-container');
+    const usersTableBody = document.querySelector('#users-table tbody');
+
+    // Modals
+    const modalContainer = document.getElementById('modal-container');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalOkButton = document.getElementById('modal-ok-button');
+
+    const userModalContainer = document.getElementById('user-modal-container');
+    const userModalTitle = document.getElementById('user-modal-title');
+    const userForm = document.getElementById('user-form');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const userModalCancelBtn = document.getElementById('user-modal-cancel');
+
+    const detailsModalContainer = document.getElementById('details-modal-container');
+    const detailsForm = document.getElementById('details-form');
+    const detailsModalCancelTopBtn = document.getElementById('details-modal-cancel-top');
+    const detailsModalCancelBtn = document.getElementById('details-modal-cancel');
+
+    const confirmModalContainer = document.getElementById('confirm-modal-container');
+    const emptyTableBtn = document.getElementById('empty-table-btn');
+    const confirmEmptyBtn = document.getElementById('confirm-empty-btn');
+    const cancelEmptyBtn = document.getElementById('cancel-empty-btn');
+
+    const categoriesModalContainer = document.getElementById('categories-modal-container');
+    const editCategoriesBtn = document.getElementById('edit-categories-btn');
+    const categoriesForm = document.getElementById('categories-form');
+    const addCategoryBtn = document.getElementById('add-category-btn');
+    const categoriesModalCancelBtn = document.getElementById('categories-modal-cancel');
+    const categoriesListContainer = document.getElementById('categories-list-container');
+
+    const trendsModalContainer = document.getElementById('trends-modal-container');
+    const editTrendsBtn = document.getElementById('edit-trends-btn');
+    const trendsForm = document.getElementById('trends-form');
+    const addTrendBtn = document.getElementById('add-trend-btn');
+    const trendsModalCancelBtn = document.getElementById('trends-modal-cancel');
+    const trendsListContainer = document.getElementById('trends-list-container');
+    
+    // Botón de descargar reporte en panel de admin
+    const adminDownloadReportBtn = document.getElementById('admin-download-report-btn');
+    adminDownloadReportBtn.addEventListener('click', () => {
+        // 1. Redirigir a la pantalla de Login en la vista actual.
+        switchScreen(adminScreen, loginScreen);
+
+        // 2. Crear una copia fiel del DOM actual para generar el reporte.
+        const reportDocument = document.documentElement.cloneNode(true);
+        
+        // 3. Modificar el clon para que la pantalla de Login sea la única visible por defecto.
+        const loginScreenClone = reportDocument.querySelector('#login-screen');
+        const dashboardScreenClone = reportDocument.querySelector('#dashboard-screen');
+        const adminScreenClone = reportDocument.querySelector('#admin-screen');
+
+        if (loginScreenClone) {
+            loginScreenClone.classList.remove('hidden-screen');
+            loginScreenClone.style.display = 'flex';
+        }
+        if (dashboardScreenClone) {
+            dashboardScreenClone.classList.add('hidden-screen');
+            dashboardScreenClone.style.display = 'none';
+        }
+        if (adminScreenClone) {
+            adminScreenClone.classList.add('hidden-screen');
+            adminScreenClone.style.display = 'none';
+        }
+
+        // 4. Eliminar el script del clon para que el reporte sea estático.
+        const scriptInClone = reportDocument.querySelector('script');
+        if (scriptInClone) {
+            scriptInClone.remove();
+        }
+
+        // 5. Convertir el DOM clonado y modificado a una cadena de texto HTML.
+        const htmlContent = reportDocument.outerHTML;
+
+        // 6. Crear un Blob (archivo en memoria) con el contenido.
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+
+        // 7. Crear una URL temporal y un enlace para iniciar la descarga.
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reporte_evaluacion.html'; // Nombre del archivo.
+        document.body.appendChild(a);
+        a.click();
+        
+        // 8. Limpiar el enlace y la URL.
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    // Función para mostrar el modal de alerta
+    function showModal(title, message) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modalContainer.classList.remove('hidden');
+    }
+
+    modalOkButton.addEventListener('click', () => {
+        modalContainer.classList.add('hidden');
+    });
+
+    function switchScreen(fromScreen, toScreen) {
+        fromScreen.classList.add('hidden-screen');
+        setTimeout(() => {
+            fromScreen.style.display = 'none';
+            toScreen.style.display = 'flex';
+            setTimeout(() => {
+                toScreen.classList.remove('hidden-screen');
+            }, 10);
+        }, 500);
+    }
+
+    function handleLogin() {
+        const username = userInput.value.trim().toLowerCase();
+        currentUser = database.users[username];
+
+        if (currentUser) {
+            if (currentUser.role === 'admin') {
+                renderAdminPanel();
+                switchScreen(loginScreen, adminScreen);
+            } else {
+                renderDashboard(currentUser.id);
+                switchScreen(loginScreen, dashboardScreen);
+            }
+        } else {
+            showModal('Error de Acceso', 'Usuario no encontrado. Por favor, verifica tu nombre de usuario.');
+        }
+    }
+
+    loginButton.addEventListener('click', handleLogin);
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+
+    logoutButton.addEventListener('click', () => {
+        switchScreen(dashboardScreen, loginScreen);
+        resetUI();
+    });
+
+    adminLogoutButton.addEventListener('click', () => {
+        switchScreen(adminScreen, loginScreen);
+        resetUI();
+    });
+
+    function resetUI() {
+        userInput.value = '';
+        document.getElementById('login-title').textContent = database.loginTexts.title;
+        document.getElementById('login-subtitle').textContent = database.loginTexts.subtitle;
+        document.getElementById('login-description').textContent = database.loginTexts.description;
+    }
+
+    function renderDashboard(userId) {
+        const user = database.users[userId];
+        userNameElement.textContent = user.name;
+        document.getElementById('general-score').textContent = user.generalScore;
+        document.getElementById('general-progress').style.width = `${user.generalScore * 10}%`;
+        document.getElementById('calls-score').textContent = user.callsScore;
+        document.getElementById('calls-progress').style.width = `${user.callsScore * 10}%`;
+        document.getElementById('general-comments').textContent = user.generalComments;
+        document.getElementById('eval-details-link').href = user.evalDetailsLink;
+        document.getElementById('plan-link').href = user.planLink;
+        document.getElementById('dashboard-title').textContent = user.dashboardTitle;
+        document.getElementById('score-2-months-ago').innerHTML = user.monthlyScores['Hace 2 Meses'];
+        document.getElementById('score-last-month').innerHTML = user.monthlyScores['Mes Anterior'];
+        document.getElementById('score-this-month').innerHTML = user.monthlyScores['Mes Actual'];
+        document.getElementById('major-improvement-text').textContent = user.improvement;
+        document.getElementById('critical-area-text').textContent = user.criticalArea;
+        document.getElementById('plan-instructions').textContent = user.planInstructions;
+
+        renderCategories();
+        renderBadges();
+
+        document.querySelector('[data-tab="resumen"]').click();
+    }
+
+    function renderCategories() {
+        categoriasContainer.innerHTML = '';
+        database.evaluationData.forEach(cat => {
+            const totalScore = cat.criteria.reduce((sum, c) => sum + c.score, 0);
+            const averageScore = (totalScore / cat.criteria.length).toFixed(1);
+            const scoreColor = averageScore >= 7.0 ? 'border-green-500' : 'border-red-500';
+
+            const card = document.createElement('div');
+            card.classList.add('category-card', 'bg-white', 'p-6', 'rounded-2xl', 'shadow-md', 'border', 'border-gray-200');
+            card.style.backgroundColor = cat.colors[0];
+
+            let criteriaHtml = cat.criteria.map(c => `
+                <li class="flex justify-between items-center text-gray-800">
+                    <span class="font-medium">${c.name}</span>
+                    <span class="text-sm font-semibold">${c.score.toFixed(1)}</span>
+                </li>
+            `).join('');
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-white flex items-center gap-2">${cat.category} ${cat.emoji}</h3>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-white border-4 ${scoreColor} shadow-md text-gray-800 font-bold">${averageScore}</div>
+                </div>
+                <div class="flex justify-center items-center bg-white p-1 rounded-full mb-4">
+                    <button class="tab-comment-btn w-1/2 py-2 rounded-full text-sm font-semibold" data-tab-name="supervision" data-category="${cat.category}">Supervisión</button>
+                    <button class="tab-comment-btn w-1/2 py-2 rounded-full text-sm font-semibold" data-tab-name="quality" data-category="${cat.category}">Calidad</button>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-inner text-left text-gray-700 h-20 mb-4 overflow-y-auto">
+                    <p class="comment-text" data-comment-for="${cat.category}"></p>
+                </div>
+                <button class="toggle-criteria-btn w-full text-left py-2 px-4 flex justify-between items-center text-sm font-semibold rounded-lg text-white bg-opacity-30 hover:bg-opacity-50 transition duration-200">
+                    Criterios de Calificación
+                    <span class="arrow-icon">&#9660;</span>
+                </button>
+                <div class="criteria-content bg-white p-4 rounded-lg" data-criteria-for="${cat.category}">
+                    <ul class="space-y-2 text-sm text-left">
+                        ${criteriaHtml}
+                    </ul>
+                </div>
+            `;
+            categoriasContainer.appendChild(card);
+        });
+
+        document.querySelectorAll('.tab-comment-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const category = e.target.dataset.category;
+                const tabName = e.target.dataset.tabName;
+                const commentTextElement = document.querySelector(`.comment-text[data-comment-for="${category}"]`);
+                const categoryData = database.evaluationData.find(d => d.category === category);
+
+                document.querySelectorAll(`.tab-comment-btn[data-category="${category}"]`).forEach(b => {
+                    b.style.backgroundColor = 'transparent';
+                    b.style.color = '#4a5568';
                 });
 
-                // Actualizar gráfica de tendencias
-                const ctx = document.getElementById('performance-chart').getContext('2d');
-                if (myChart) {
-                    myChart.destroy();
-                }
-                myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre'],
-                        datasets: [{
-                            label: 'Calificación General',
-                            data: [80, 83, 85, 87, data.generalScore], // Ejemplo de datos, se puede mejorar
-                            borderColor: '#2a6aff',
-                            backgroundColor: 'rgba(42, 106, 255, 0.2)',
-                            tension: 0.3,
-                            fill: true,
-                            pointBackgroundColor: '#ff8500',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#ff8500',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += `${context.parsed.y}%`;
-                                        }
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                min: 50,
-                                max: 100,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + '%';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                loginWindow.classList.add('hidden');
-                evaluationWindow.classList.remove('hidden');
-            } else {
-                alert('Usuario no encontrado. Por favor, intenta de nuevo.');
-            }
-        };
-
-        // Evento para el botón de login
-        loginButton.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            if (username) {
-                showEvaluation(username);
-            } else {
-                alert('Por favor, ingresa un usuario.');
-            }
-        });
-
-        // Evento para la tecla Enter
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const username = usernameInput.value.trim();
-                if (username) {
-                    showEvaluation(username);
-                }
-            }
-        });
-
-        // Evento para el botón de volver
-        backButton.addEventListener('click', () => {
-            loginWindow.classList.remove('hidden');
-            evaluationWindow.classList.add('hidden');
-            usernameInput.value = '';
-        });
-
-        // Lógica de pestañas
-        Object.values(tabs).forEach(tab => {
-            tab.addEventListener('click', () => {
-                Object.values(tabs).forEach(t => t.classList.remove('active', 'text-blue-600'));
-                Object.values(tabPanes).forEach(p => p.classList.add('hidden'));
-
-                tab.classList.add('active', 'text-blue-600');
-                const targetPaneId = tab.id.replace('tab-', 'content-');
-                document.getElementById(targetPaneId).classList.remove('hidden');
+                e.target.style.backgroundColor = categoryData.colors[1];
+                e.target.style.color = 'white';
+                commentTextElement.textContent = categoryData.comments[tabName];
             });
         });
 
-        // Inicializar con la primera pestaña activa
-        tabs.summary.click();
+        document.querySelectorAll('.toggle-criteria-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.category-card');
+                const criteriaContent = card.querySelector('.criteria-content');
+                const arrowIcon = btn.querySelector('.arrow-icon');
+                
+                if (criteriaContent.classList.contains('open')) {
+                    criteriaContent.classList.remove('open');
+                    criteriaContent.style.maxHeight = '0';
+                } else {
+                    criteriaContent.classList.add('open');
+                    criteriaContent.style.maxHeight = criteriaContent.scrollHeight + 'px';
+                }
+                arrowIcon.classList.toggle('open');
+            });
+        });
+
+        document.querySelectorAll('.tab-comment-btn').forEach(btn => {
+            if (btn.dataset.tabName === 'supervision') {
+                btn.click();
+            }
+        });
+    }
+
+    function renderBadges() {
+        const badgesList = document.getElementById('badges-list');
+        const nextBadgesList = document.getElementById('next-badges-list');
+        badgesList.innerHTML = '';
+        nextBadgesList.innerHTML = '';
+
+        database.badges.forEach(badge => {
+            badgesList.innerHTML += `
+                <li class="flex items-start gap-3">
+                    <span class="text-2xl">${badge.icon}</span>
+                    <div>
+                        <h3 class="font-semibold text-lg">${badge.title}</h3>
+                        <p class="text-gray-600">${badge.description}</p>
+                    </div>
+                </li>
+            `;
+        });
+
+        database.nextBadges.forEach(badge => {
+            nextBadgesList.innerHTML += `
+                <li class="flex items-start gap-3">
+                    <span class="text-2xl">${badge.icon}</span>
+                    <div>
+                        <h3 class="font-semibold text-lg">${badge.title}</h3>
+                        <p class="text-gray-600">${badge.description}</p>
+                        ${badge.meta ? `<p class="text-gray-600 font-bold mt-1">Meta: ${badge.meta}</p>` : ''}
+                    </div>
+                </li>
+            `;
+        });
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.tab-page').forEach(page => page.classList.add('hidden'));
+            tabs.forEach(t => t.classList.remove('bg-[#2a6aff]', 'text-white'));
+            
+            const tabId = e.target.dataset.tab;
+            document.getElementById(`${tabId}-content`).classList.remove('hidden');
+            e.target.classList.add('bg-[#2a6aff]', 'text-white');
+            
+            if (tabId === 'tendencias') {
+                renderTrendsChart();
+            }
+        });
     });
+
+    function renderTrendsChart() {
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+        const months = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'];
+        const datasets = Object.keys(database.trendsData).map(key => ({
+            label: key,
+            data: database.trendsData[key],
+            borderColor: database.trendsColors[key],
+            fill: false,
+            tension: 0.4,
+            hidden: false
+        }));
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Puntaje de Evaluación'
+                        },
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Módulos'
+                        }
+                    }
+                }
+            }
+        });
+
+        const chartButtonsContainer = document.getElementById('chart-buttons-container');
+        chartButtonsContainer.innerHTML = `
+            <button id="select-all-btn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-xl text-sm transition-colors duration-200 hover:bg-gray-400">Seleccionar Todo</button>
+            <button id="deselect-all-btn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-xl text-sm transition-colors duration-200 hover:bg-gray-400">Desactivar Todo</button>
+        `;
+        Object.keys(database.trendsData).forEach(key => {
+            const button = document.createElement('button');
+            button.textContent = key;
+            button.dataset.category = key;
+            button.classList.add('bg-gray-300', 'text-gray-800', 'py-2', 'px-4', 'rounded-xl', 'text-sm', 'transition-colors', 'duration-200', 'hover:bg-gray-400', 'chart-category-btn');
+            button.addEventListener('click', () => {
+                const dataset = chartInstance.data.datasets.find(ds => ds.label === key);
+                if (dataset) {
+                    dataset.hidden = !dataset.hidden;
+                    chartInstance.update();
+                }
+            });
+            chartButtonsContainer.appendChild(button);
+        });
+        
+        document.getElementById('select-all-btn').addEventListener('click', () => {
+            chartInstance.data.datasets.forEach(dataset => dataset.hidden = false);
+            chartInstance.update();
+        });
+        document.getElementById('deselect-all-btn').addEventListener('click', () => {
+            chartInstance.data.datasets.forEach(dataset => dataset.hidden = true);
+            chartInstance.update();
+        });
+    }
+
+    // Lógica del Panel de Administrador
+    function renderAdminPanel() {
+        renderUsersTable();
+        document.getElementById('admin-login-title').value = database.loginTexts.title;
+        document.getElementById('admin-login-subtitle').value = database.loginTexts.subtitle;
+        document.getElementById('admin-login-description').value = database.loginTexts.description;
+    }
+
+    // Renderizar la tabla de usuarios
+    function renderUsersTable() {
+        usersTableBody.innerHTML = '';
+        const userList = Object.values(database.users).filter(u => u.role === 'user');
+        
+        userList.forEach(user => {
+            const row = document.createElement('tr');
+            row.dataset.userId = user.id;
+            
+            row.innerHTML = `
+                <td class="user-id">${user.id}</td>
+                <td class="user-name">${user.name}</td>
+                <td class="user-general-score">${user.generalScore}</td>
+                <td class="user-calls-score">${user.callsScore}</td>
+                <td class="user-comments">${user.generalComments.length > 50 ? user.generalComments.substring(0, 50) + '...' : user.generalComments}</td>
+                <td class="actions-cell">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button class="edit-user-btn bg-yellow-400 text-gray-800 py-1 px-3 rounded-full text-xs font-semibold hover:bg-yellow-500 transition duration-200">
+                            Editar
+                        </button>
+                        <button class="delete-user-btn bg-red-400 text-white py-1 px-3 rounded-full text-xs font-semibold hover:bg-red-500 transition duration-200">
+                            Eliminar
+                        </button>
+                        <button class="details-user-btn bg-blue-400 text-white py-1 px-3 rounded-full text-xs font-semibold hover:bg-blue-500 transition duration-200">
+                            Detalles
+                        </button>
+                    </div>
+                </td>
+            `;
+            usersTableBody.appendChild(row);
+        });
+    }
+
+    // Lógica para añadir/editar usuario
+    addUserBtn.addEventListener('click', () => {
+        userModalTitle.textContent = 'Añadir Nuevo Usuario';
+        userForm.reset();
+        userModalContainer.classList.remove('hidden');
+    });
+
+    userModalCancelBtn.addEventListener('click', () => {
+        userModalContainer.classList.add('hidden');
+    });
+
+    userForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('form-id').value.trim();
+        const userName = document.getElementById('form-name').value.trim();
+        const userRole = document.getElementById('form-role').value;
+        const generalScore = parseFloat(document.getElementById('form-general-score').value);
+        const callsScore = parseFloat(document.getElementById('form-calls-score').value);
+        const comments = document.getElementById('form-comments').value.trim();
+
+        if (database.users[userId] && userModalTitle.textContent === 'Añadir Nuevo Usuario') {
+            showModal('Error', 'El usuario ya existe. Por favor, elige otro ID.');
+            return;
+        }
+        
+        if (userModalTitle.textContent === 'Añadir Nuevo Usuario') {
+            const newUser = {
+                id: userId,
+                name: userName,
+                role: userRole,
+                generalScore: generalScore || 0,
+                callsScore: callsScore || 0,
+                generalComments: comments || '',
+                dashboardTitle: 'Resultados de Evaluación 📊',
+                evalDetailsLink: `https://example.com/detalles/${userId}`,
+                planLink: `https://example.com/plan-de-trabajo/${userId}`,
+                improvement: `La mayor mejora para ${userName} es...`,
+                criticalArea: `El área crítica para ${userName} es...`,
+                planInstructions: `Instrucciones del plan de mejora para ${userName}.`,
+                monthlyScores: {
+                    'Hace 2 Meses': '0.0',
+                    'Mes Anterior': '0.0',
+                    'Mes Actual': '0.0'
+                }
+            };
+            database.users[userId] = newUser;
+            showModal('Éxito', 'Usuario añadido correctamente.');
+        } else {
+            const currentId = userModalContainer.dataset.editingId;
+            const user = database.users[currentId];
+            if (user) {
+                user.id = userId;
+                user.name = userName;
+                user.role = userRole;
+                user.generalScore = generalScore;
+                user.callsScore = callsScore;
+                user.generalComments = comments;
+
+                if (currentId !== userId) {
+                    delete database.users[currentId];
+                    database.users[userId] = user;
+                }
+            }
+            showModal('Éxito', 'Usuario actualizado correctamente.');
+        }
+
+        userModalContainer.classList.add('hidden');
+        saveDatabase();
+        renderUsersTable();
+    });
+
+    // Delegación de eventos para la tabla
+    usersTableBody.addEventListener('click', (e) => {
+        const row = e.target.closest('tr');
+        if (!row) return;
+
+        const userId = row.dataset.userId;
+
+        if (e.target.classList.contains('edit-user-btn')) {
+            const user = database.users[userId];
+            if (user) {
+                userModalTitle.textContent = 'Editar Usuario';
+                document.getElementById('form-id').value = user.id;
+                document.getElementById('form-name').value = user.name;
+                document.getElementById('form-role').value = user.role;
+                document.getElementById('form-general-score').value = user.generalScore;
+                document.getElementById('form-calls-score').value = user.callsScore;
+                document.getElementById('form-comments').value = user.generalComments;
+                userModalContainer.dataset.editingId = userId;
+                userModalContainer.classList.remove('hidden');
+            }
+        } else if (e.target.classList.contains('delete-user-btn')) {
+            if (confirm(`¿Estás seguro de que quieres eliminar al usuario ${userId}?`)) {
+                delete database.users[userId];
+                saveDatabase();
+                renderUsersTable();
+                showModal('Éxito', 'Usuario eliminado correctamente.');
+            }
+        } else if (e.target.classList.contains('details-user-btn')) {
+            const user = database.users[userId];
+            if (user) {
+                populateDetailsModal(user);
+                detailsModalContainer.classList.remove('hidden');
+                detailsModalContainer.dataset.editingId = userId;
+            }
+        }
+    });
+
+    // Lógica para el modal de detalles
+    function populateDetailsModal(user) {
+        document.getElementById('details-modal-title').textContent = `Detalles de ${user.name}`;
+        document.getElementById('details-dashboard-title').value = user.dashboardTitle;
+        document.getElementById('details-eval-link').value = user.evalDetailsLink;
+        document.getElementById('details-plan-link').value = user.planLink;
+        document.getElementById('details-general-comments').value = user.generalComments;
+        document.getElementById('details-improvement').value = user.improvement;
+        document.getElementById('details-critical-area').value = user.criticalArea;
+        document.getElementById('details-plan-instructions').value = user.planInstructions;
+
+        // Populate Trends data
+        const trendsFormContainer = document.getElementById('trends-form-container');
+        trendsFormContainer.innerHTML = '';
+        Object.keys(database.trendsData).forEach(trend => {
+            trendsFormContainer.innerHTML += `
+                <div class="space-y-2 mb-4 p-2 border rounded-lg bg-white">
+                    <h5 class="font-bold">${trend}</h5>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${database.trendsData[trend].map((score, index) => `
+                            <label class="text-xs">
+                                M${index + 1}:
+                                <input type="number" step="0.1" min="0" max="10" class="w-full p-1 border rounded" value="${score}" data-trend="${trend}" data-month="${index}">
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        // Populate Categories and Criteria data
+        const criteriaFormContainer = document.getElementById('criteria-form-container');
+        criteriaFormContainer.innerHTML = '';
+        database.evaluationData.forEach(category => {
+            criteriaFormContainer.innerHTML += `
+                <div class="bg-gray-100 p-4 rounded-xl">
+                    <h4 class="text-lg font-semibold mb-2">Categoría: ${category.category}</h4>
+                    <div id="criteria-for-${category.category.replace(/\s/g, '-')}" class="space-y-2">
+                        ${category.criteria.map(criteria => `
+                            <div class="flex items-center gap-2">
+                                <span class="flex-1 text-sm">${criteria.name}</span>
+                                <input type="number" step="0.1" min="0" max="10" class="w-20 p-1 border rounded text-right" value="${criteria.score}" data-category="${category.category}" data-criteria="${criteria.name}">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    detailsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const userId = detailsModalContainer.dataset.editingId;
+        const user = database.users[userId];
+        if (user) {
+            user.dashboardTitle = document.getElementById('details-dashboard-title').value;
+            user.evalDetailsLink = document.getElementById('details-eval-link').value;
+            user.planLink = document.getElementById('details-plan-link').value;
+            user.generalComments = document.getElementById('details-general-comments').value;
+            user.improvement = document.getElementById('details-improvement').value;
+            user.criticalArea = document.getElementById('details-critical-area').value;
+            user.planInstructions = document.getElementById('details-plan-instructions').value;
+
+            // Update Trends data
+            document.querySelectorAll('#trends-form-container input').forEach(input => {
+                const trend = input.dataset.trend;
+                const month = parseInt(input.dataset.month);
+                database.trendsData[trend][month] = parseFloat(input.value);
+            });
+
+            // Update Criteria scores
+            document.querySelectorAll('#criteria-form-container input').forEach(input => {
+                const category = input.dataset.category;
+                const criteriaName = input.dataset.criteria;
+                const categoryData = database.evaluationData.find(c => c.category === category);
+                if (categoryData) {
+                    const criteria = categoryData.criteria.find(c => c.name === criteriaName);
+                    if (criteria) {
+                        criteria.score = parseFloat(input.value);
+                    }
+                }
+            });
+
+            saveDatabase();
+            showModal('Éxito', 'Detalles de usuario actualizados correctamente.');
+            detailsModalContainer.classList.add('hidden');
+        }
+    });
+
+    detailsModalCancelBtn.addEventListener('click', () => { detailsModalContainer.classList.add('hidden'); });
+    detailsModalCancelTopBtn.addEventListener('click', () => { detailsModalContainer.classList.add('hidden'); });
+
+    // Lógica para vaciar la tabla
+    emptyTableBtn.addEventListener('click', () => {
+        confirmModalContainer.classList.remove('hidden');
+    });
+
+    confirmEmptyBtn.addEventListener('click', () => {
+        const adminUser = database.users['admin'];
+        database.users = { 'admin': adminUser };
+        saveDatabase();
+        renderUsersTable();
+        confirmModalContainer.classList.add('hidden');
+        showModal('Tabla Vaciada', 'Todos los datos de usuarios han sido eliminados correctamente.');
+    });
+
+    cancelEmptyBtn.addEventListener('click', () => {
+        confirmModalContainer.classList.add('hidden');
+    });
+
+    // Lógica para editar categorías/criterios
+    editCategoriesBtn.addEventListener('click', () => {
+        renderCategoriesModal();
+        categoriesModalContainer.classList.remove('hidden');
+    });
+    
+    function renderCategoriesModal() {
+        categoriesListContainer.innerHTML = '';
+        database.evaluationData.forEach(cat => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.classList.add('p-4', 'border', 'rounded-lg', 'bg-white', 'space-y-2');
+            categoryDiv.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <input type="text" class="category-name-input text-lg font-bold w-4/5 p-1 border rounded" value="${cat.category}">
+                    <button type="button" class="remove-category-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+                </div>
+                <label class="block">Emoji: <input type="text" class="category-emoji-input w-20 p-1 border rounded" value="${cat.emoji}"></label>
+                <div class="space-y-1 mt-2 criteria-inputs">
+                    <h5 class="font-semibold text-sm">Criterios:</h5>
+                    ${cat.criteria.map(crit => `
+                        <div class="flex items-center gap-2">
+                            <input type="text" class="criteria-name-input flex-1 p-1 border rounded" value="${crit.name}">
+                            <button type="button" class="remove-criteria-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="add-criteria-btn w-full bg-gray-100 text-gray-600 text-sm py-1 rounded-lg">Añadir Criterio</button>
+            `;
+            categoriesListContainer.appendChild(categoryDiv);
+        });
+    }
+
+    categoriesForm.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-criteria-btn')) {
+            const criteriaContainer = e.target.previousElementSibling;
+            const newCriteriaDiv = document.createElement('div');
+            newCriteriaDiv.classList.add('flex', 'items-center', 'gap-2');
+            newCriteriaDiv.innerHTML = `
+                <input type="text" class="criteria-name-input flex-1 p-1 border rounded" placeholder="Nuevo Criterio">
+                <button type="button" class="remove-criteria-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+            `;
+            criteriaContainer.appendChild(newCriteriaDiv);
+        } else if (e.target.classList.contains('remove-category-btn')) {
+            if (categoriesListContainer.children.length > 1) {
+                e.target.closest('div.p-4').remove();
+            } else {
+                showModal('Error', 'Debe haber al menos una categoría.');
+            }
+        } else if (e.target.classList.contains('remove-criteria-btn')) {
+            const criteriaContainer = e.target.closest('.criteria-inputs');
+            if (criteriaContainer.children.length > 2) {
+                e.target.closest('div.flex').remove();
+            } else {
+                showModal('Error', 'Cada categoría debe tener al menos un criterio.');
+            }
+        }
+    });
+
+    addCategoryBtn.addEventListener('click', () => {
+        const newCategoryDiv = document.createElement('div');
+        newCategoryDiv.classList.add('p-4', 'border', 'rounded-lg', 'bg-white', 'space-y-2');
+        newCategoryDiv.innerHTML = `
+            <div class="flex justify-between items-center">
+                <input type="text" class="category-name-input text-lg font-bold w-4/5 p-1 border rounded" placeholder="Nueva Categoría">
+                <button type="button" class="remove-category-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+            </div>
+            <label class="block">Emoji: <input type="text" class="category-emoji-input w-20 p-1 border rounded" placeholder="👍"></label>
+            <div class="space-y-1 mt-2 criteria-inputs">
+                <h5 class="font-semibold text-sm">Criterios:</h5>
+                <div class="flex items-center gap-2">
+                    <input type="text" class="criteria-name-input flex-1 p-1 border rounded" placeholder="Nuevo Criterio">
+                    <button type="button" class="remove-criteria-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+                </div>
+            </div>
+            <button type="button" class="add-criteria-btn w-full bg-gray-100 text-gray-600 text-sm py-1 rounded-lg">Añadir Criterio</button>
+        `;
+        categoriesListContainer.appendChild(newCategoryDiv);
+    });
+
+    categoriesModalCancelBtn.addEventListener('click', () => {
+        categoriesModalContainer.classList.add('hidden');
+    });
+
+    categoriesForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newEvaluationData = [];
+        document.querySelectorAll('#categories-list-container > div').forEach(div => {
+            const categoryName = div.querySelector('.category-name-input').value;
+            const emoji = div.querySelector('.category-emoji-input').value;
+            const criteriaList = [];
+            div.querySelectorAll('.criteria-name-input').forEach(input => {
+                criteriaList.push({ name: input.value, score: 0 }); // Score is 0 by default, edited in details
+            });
+            newEvaluationData.push({
+                category: categoryName,
+                emoji: emoji,
+                colors: ['#2a6aff', '#4f8bff'], // Default colors
+                comments: { supervision: '', quality: '' }, // Default comments
+                criteria: criteriaList
+            });
+        });
+        database.evaluationData = newEvaluationData;
+        saveDatabase();
+        categoriesModalContainer.classList.add('hidden');
+        showModal('Éxito', 'Categorías y criterios actualizados correctamente.');
+    });
+
+    // Lógica para editar tendencias
+    editTrendsBtn.addEventListener('click', () => {
+        renderTrendsModal();
+        trendsModalContainer.classList.remove('hidden');
+    });
+
+    function renderTrendsModal() {
+        trendsListContainer.innerHTML = '';
+        Object.keys(database.trendsData).forEach(trend => {
+            const trendDiv = document.createElement('div');
+            trendDiv.classList.add('p-4', 'border', 'rounded-lg', 'bg-white', 'space-y-2');
+            trendDiv.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <input type="text" class="trend-name-input text-lg font-bold w-4/5 p-1 border rounded" value="${trend}">
+                    <button type="button" class="remove-trend-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+                </div>
+                <label class="block">Color: <input type="color" class="trend-color-input w-20 h-8 p-1 border rounded" value="${database.trendsColors[trend]}"></label>
+            `;
+            trendsListContainer.appendChild(trendDiv);
+        });
+    }
+
+    trendsForm.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-trend-btn')) {
+            e.target.closest('div.p-4').remove();
+        }
+    });
+
+    addTrendBtn.addEventListener('click', () => {
+        const newTrendDiv = document.createElement('div');
+        newTrendDiv.classList.add('p-4', 'border', 'rounded-lg', 'bg-white', 'space-y-2');
+        newTrendDiv.innerHTML = `
+            <div class="flex justify-between items-center">
+                <input type="text" class="trend-name-input text-lg font-bold w-4/5 p-1 border rounded" placeholder="Nueva Tendencia">
+                <button type="button" class="remove-trend-btn text-red-500 font-bold text-xl leading-none">&times;</button>
+            </div>
+            <label class="block">Color: <input type="color" class="trend-color-input w-20 h-8 p-1 border rounded" value="#cccccc"></label>
+        `;
+        trendsListContainer.appendChild(newTrendDiv);
+    });
+
+    trendsModalCancelBtn.addEventListener('click', () => {
+        trendsModalContainer.classList.add('hidden');
+    });
+
+    trendsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newTrendsData = {};
+        const newTrendsColors = {};
+        document.querySelectorAll('#trends-list-container > div').forEach(div => {
+            const trendName = div.querySelector('.trend-name-input').value;
+            const trendColor = div.querySelector('.trend-color-input').value;
+            newTrendsData[trendName] = Array(12).fill(0); // Default scores
+            newTrendsColors[trendName] = trendColor;
+        });
+        database.trendsData = newTrendsData;
+        database.trendsColors = newTrendsColors;
+        saveDatabase();
+        trendsModalContainer.classList.add('hidden');
+        showModal('Éxito', 'Categorías de tendencias actualizadas correctamente.');
+    });
+
+    // Guardar configuración general del login
+    document.getElementById('save-general-settings-btn').addEventListener('click', () => {
+        database.loginTexts.title = document.getElementById('admin-login-title').value;
+        database.loginTexts.subtitle = document.getElementById('admin-login-subtitle').value;
+        database.loginTexts.description = document.getElementById('admin-login-description').value;
+        saveDatabase();
+        showModal('Configuración Guardada', 'Los textos de la pantalla de login han sido actualizados.');
+    });
+
+    // Cargar la configuración de login al inicio
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('login-title').textContent = database.loginTexts.title;
+        document.getElementById('login-subtitle').textContent = database.loginTexts.subtitle;
+        document.getElementById('login-description').textContent = database.loginTexts.description;
+    });
+
 </script>
 
-</body>
-</html>
+</body></html>
+
